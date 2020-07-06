@@ -26,5 +26,5 @@ api = tradeapi.REST(keys.key, keys.secret_key, keys.base_url, api_version='v2')
 
 # price = api.get_last_quote("MSFT")
 # print(price)
-# cfg = api.get_account()
+print(api.get_account())
 # print(cfg)
