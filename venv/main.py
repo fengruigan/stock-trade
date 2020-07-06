@@ -23,5 +23,6 @@ api = tradeapi.REST(keys.key, keys.secret_key, keys.base_url, api_version='v2')
 # print(price)
 # print(cfg)
 # print(api.get_position("AMZN"))
-
+df = api.get_barset('AAPL', 'day', limit=20).df['AAPL']
+print(type(df.close))
 
