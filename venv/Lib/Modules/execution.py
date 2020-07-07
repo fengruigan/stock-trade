@@ -13,6 +13,7 @@ import alpaca_trade_api as tradeapi
 
 api = tradeapi.REST(keys.key, keys.secret_key, keys.base_url, api_version="v2")
 
+
 def order(symbol: str, qty: int, side: str, type: str="market", time_in_force: str="gtc"):
     """
     This method is a refactoring of the original alpaca submit_order() method
@@ -136,7 +137,6 @@ def order_target(symbol:str, target_share:int):
                     return None
             else:
                 return order(symbol, -shares, "sell")
-
     if (api.get_last_quote(symbol).askprice * target_share < int(api.get_account().buying_power)):
         return order(symbol, target_share, "buy")
     else:
@@ -167,7 +167,6 @@ def order_target_value(symbol: str, target_value: float):
         if (symbol.__eq__(position.symbol)):
             value = target_value - float(position.market_value)
             return order_value(symbol, value)
-
     return order_value(symbol, target_value)
 
 
@@ -192,5 +191,4 @@ def order_target_percent(symbol: str, target_percent: float):
         if (symbol.__eq__(position.symbol)):
             percent = target_percent - (float(position.market_value) / float(api.get_account().portfolio_value))
             return order_percent(symbol, percent)
-
     return order_percent(symbol, target_percent)
