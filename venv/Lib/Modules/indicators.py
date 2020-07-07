@@ -11,6 +11,7 @@ import more when needed
 import pandas as pd
 import alpaca_trade_api as tradeapi
 import ta.trend
+import bisect
 
 
 def ema(close, period=12, fillna=False):
@@ -92,3 +93,40 @@ def adx(high, low, close, period=14, fillna=False):
     :return: pd.Series of adx features
     """
     return ta.trend.adx(high=high, low=low, close=close, n=period, fillna=fillna)
+
+
+def fibonacci_support(px):
+    """
+        This method comes from blueshift_library
+
+        Computes the current Fibonnaci support and resistance levels.
+        Returns the distant of the last price point from both.
+        Args:
+            px (ndarray): input price array
+        Returns:
+            Tuple, distance from support and resistance levels.
+    """
+
+    def fibonacci_levels(px):
+        return [min(px) + l * (max(px) - min(px)) for l in [0, 0.236, 0.382, 0.5, 0.618, 1]]
+
+    def find_interval(x, val):
+        return (-1 if val < x[0] else 99) if val < x[0] or val > x[-1] \
+            else max(bisect.bisect_left(x, val) - 1, 0)
+
+    last_price = px[-1]
+    lower_dist = upper_dist = 0
+    sups = fibonacci_levels(px[:-1])
+    idx = find_interval(sups, last_price)
+
+    if idx == -1:
+        lower_dist = -1
+        upper_dist = round(100.0 * (sups[0] / last_price - 1), 2)
+    elif idx == 99:
+        lower_dist = round(100.0 * (last_price / sups[-1] - 1), 2)
+        upper_dist = -1
+    else:
+        lower_dist = round(100.0 * (last_price / sups[idx] - 1), 2)
+        upper_dist = round(100.0 * (sups[idx + 1] / last_price - 1), 2)
+
+    return lower_dist, upper_dist
