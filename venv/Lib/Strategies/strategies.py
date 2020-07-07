@@ -19,16 +19,16 @@ def initialize(context):
         A function to define things to do at the start of the strategy
     """
     # universe selection
-    context.securities = ['AMZN', 'TSLA']
+    context.securities = ['AMZN', 'AAPL']
 
     # define strategy parameters
     context.params = {'indicator_lookback':375,
-                      'indicator_freq':'1m',
+                      'indicator_freq':'1Min',
                       'buy_signal_threshold':0.5,
                       'sell_signal_threshold':-0.5,
                       'ADX_period':120,
                       'trade_freq':5,
-                      'leverage':2}
+                      'leverage':1}
 
     # variable to control trading frequency
     context.bar_count = 0
