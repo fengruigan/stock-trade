@@ -1,5 +1,12 @@
 import alpaca_trade_api as tradeapi
 
+
+class API:
+    api = None
+
+    def init_api(cls):
+        cls.api = tradeapi.REST(keys._key, keys._secret_key, keys._base_url, api_version='v2')
+
 class keys:
     _key = None
     _secret_key = None
@@ -12,13 +19,6 @@ class keys:
     def get_keys(cls):
         return cls._key, cls._secret_key
 
-    # def update_key(cls, key: str):
-    #     cls.key = key
-    #     return cls.key
-    #
-    # def update_secret_key(cls, secret_key: str):
-    #     cls.secret_key = secret_key
-    #     return cls.key
 
 class context:
     def __init__(cls):
@@ -27,8 +27,8 @@ class context:
 
 class data:
     def current(cls, symbols, timeframe='1Min'):
-        return api.get_barset(symbols=symbols, timeframe=timeframe, limit=1).df
+        return API.api.get_barset(symbols=symbols, timeframe=timeframe, limit=1).df
 
 
     def history(cls, symbols, lookback=253, timeframe='1Min'):
-        return api.get_barset(symbols=symbols, timeframe=timeframe, lookback=lookback).df
+        return API.api.get_barset(symbols=symbols, timeframe=timeframe, lookback=lookback).df

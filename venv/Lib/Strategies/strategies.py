@@ -9,7 +9,6 @@ Style tags: momentum and mean reversion
 Asset class: Equities, Futures, ETFs and Currencies
 Dataset: NSE Minute
 """
-import alpaca_trade_api as tradeapi
 from Lib.Modules.indicators import fibonacci_support, adx
 from Lib.Modules.execution import order_target_percent
 
@@ -27,8 +26,8 @@ def initialize(context):
                       'buy_signal_threshold':0.5,
                       'sell_signal_threshold':-0.5,
                       'ADX_period':120,
-                      'trade_freq':3,
-                      'leverage':2}
+                      'trade_freq':1,
+                      'leverage':1}
 
     # variable to control trading frequency
     context.bar_count = 0
@@ -64,6 +63,7 @@ def rebalance(context,data):
         A function to rebalance - all execution logic goes here
     '''
     for security in context.securities:
+        print(security + " position at " + str(context.target_position[security]))
         order_target_percent(security, context.target_position[security])
 
 def generate_target_position(context, data):
@@ -89,12 +89,14 @@ def generate_signals(context, data):
         price_data = data.history(context.securities,
             context.params['indicator_lookback'], context.params['indicator_freq'])
     except:
+        print("error here!!!!!!!")
         return
 
     for security in context.securities:
         px = price_data.minor_xs(security)
         context.signals[security] = signal_function(px, context.params,
             context.signals[security])
+        print(security + " has signal " + str(context.signals[security]))
 
 def signal_function(px, params, last_signal):
     """

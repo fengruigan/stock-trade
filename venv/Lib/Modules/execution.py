@@ -7,14 +7,7 @@ or wait for orders to be filled
 
 I think I will put order check in strategies section
 """
-from Lib.Modules.run import keys
-import alpaca_trade_api as tradeapi
-
-
-def init_keys():
-    key_id, secret_key = keys.get_keys(keys)
-    print(key_id)
-    api = tradeapi.REST(key_id, secret_key, keys._base_url, api_version="v2")
+from Lib.Modules.run import API
 
 
 def order(symbol: str, qty: int, side: str, type: str="market", time_in_force: str="gtc"):
@@ -28,7 +21,7 @@ def order(symbol: str, qty: int, side: str, type: str="market", time_in_force: s
     :param time_in_force: day, gtc, opg, cls, ioc, fok
     :return: returns order id
     """
-    return api.submit_order(symbol, qty, side, type, time_in_force).id
+    return API.api.submit_order(symbol, qty, side, type, time_in_force).id
 
 
 def order_value(symbol: str, value: float):
@@ -51,8 +44,8 @@ def order_value(symbol: str, value: float):
         print("Order value cannot be 0")
         return None
     elif (value > 0):
-        if (float(api.get_account().buying_power) > value):
-            askprice = api.get_last_quote(symbol).askprice
+        if (float(API.api.get_account().buying_power) > value):
+            askprice = API.api.get_last_quote(symbol).askprice
             if (askprice != 0):
                 shares = int(value / askprice)
                 if (shares <= 0):
@@ -67,12 +60,12 @@ def order_value(symbol: str, value: float):
             return None
     else:
         value = -value
-        for position in api.list_positions():
+        for position in API.api.list_positions():
             if (symbol.__eq__(position.symbol)):
                 if (value >= position.market_value):
-                    return api.close_position(symbol).id
+                    return API.api.close_position(symbol).id
                 else:
-                    bidprice = api.get_last_quote(symbol).bidprice
+                    bidprice = API.api.get_last_quote(symbol).bidprice
                     if (bidprice != 0):
                         shares = int(value / bidprice)
                         if (shares == 0):
@@ -107,7 +100,7 @@ def order_percent(symbol:str, percent:float):
     if (percent == 0):
         print("Percentage cannot be 0%")
         return None
-    value = float(api.get_account().portfolio_value) * percent
+    value = float(API.api.get_account().portfolio_value) * percent
     return order_value(symbol, value)
 
 
@@ -126,13 +119,13 @@ def order_target(symbol:str, target_share:int):
         if current position qty of "AAPL" is 5, method will attempt to buy 5 shares of "AAPL"
         returning the order id in both cases
     """
-    for position in api.list_positions():
+    for position in API.api.list_positions():
         if (symbol.__eq__(position.symbol)):
             shares = target_share - int(position.qty)
             if shares == 0:
                 return None
             elif shares > 0:
-                if (api.get_last_quote(symbol).askprice * shares < float(api.get_account().buying_power)):
+                if (API.api.get_last_quote(symbol).askprice * shares < float(API.api.get_account().buying_power)):
                     return order(symbol, shares, "buy")
                 else:
                     print(
@@ -140,7 +133,7 @@ def order_target(symbol:str, target_share:int):
                     return None
             else:
                 return order(symbol, -shares, "sell")
-    if (api.get_last_quote(symbol).askprice * target_share < float(api.get_account().buying_power)):
+    if (API.api.get_last_quote(symbol).askprice * target_share < float(API.api.get_account().buying_power)):
         return order(symbol, target_share, "buy")
     else:
         print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
@@ -166,7 +159,7 @@ def order_target_value(symbol: str, target_value: float):
     if (target_value <= 0):
         print("Target_value must be > 0")
         return None
-    for position in api.list_positions():
+    for position in API.api.list_positions():
         if (symbol.__eq__(position.symbol)):
             value = target_value - float(position.market_value)
             return order_value(symbol, value)
@@ -193,12 +186,12 @@ def order_target_percent(symbol: str, target_percent: float):
         print("Percentage cannot be < 0")
         return None
     if (target_percent == 0):
-        for position in api.list_positions():
+        for position in API.api.list_positions():
             if (symbol.__eq__(position.symbol)):
-                return api.close_position(symbol).id
+                return API.api.close_position(symbol).id
         return None
-    for position in api.list_positions():
+    for position in API.api.list_positions():
         if (symbol.__eq__(position.symbol)):
-            percent = target_percent - (float(position.market_value) / float(api.get_account().portfolio_value))
+            percent = target_percent - (float(position.market_value) / float(API.api.get_account().portfolio_value))
             return order_percent(symbol, percent)
     return order_percent(symbol, target_percent)
