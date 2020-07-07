@@ -31,4 +31,4 @@ class data:
 
 
     def history(cls, symbols, lookback=253, timeframe='1Min'):
-        return API.api.get_barset(symbols=symbols, timeframe=timeframe, lookback=lookback).df
+        return API.api.get_barset(symbols=symbols, timeframe=timeframe, limit=lookback).df

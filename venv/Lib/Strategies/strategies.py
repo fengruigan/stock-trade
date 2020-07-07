@@ -86,14 +86,14 @@ def generate_signals(context, data):
         A function to define define the signal generation
     """
     try:
-        price_data = data.history(context.securities,
+        price_data = data.history(data, context.securities,
             context.params['indicator_lookback'], context.params['indicator_freq'])
     except:
         print("error here!!!!!!!")
         return
 
     for security in context.securities:
-        px = price_data.minor_xs(security)
+        px = price_data[security]
         context.signals[security] = signal_function(px, context.params,
             context.signals[security])
         print(security + " has signal " + str(context.signals[security]))
@@ -103,7 +103,7 @@ def signal_function(px, params, last_signal):
         The main trading logic goes here, called by generate_signals above
     """
     lower, upper = fibonacci_support(px.close)
-    ind2 = adx(px.high, px.low, px.close, params['ADX_period'])
+    ind2 = adx(px.high, px.low, px.close, params['ADX_period'])[-1]
 
     if lower == -1:
         return -1
