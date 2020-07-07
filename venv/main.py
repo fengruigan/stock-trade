@@ -6,23 +6,16 @@ import numpy as np
 import alpaca_trade_api as tradeapi
 from Lib.Modules import indicators
 from Lib.Modules import execution as exe
-from Lib.Modules.user_config import keys
+from Lib.Modules.run import keys, context, data
+from Lib.Strategies.strategies import initialize, handle_data
+
 
 # use this method to update user API keys
 keys.update_key(keys, 'PKGQG65N7CIYQORL31FA', 'WMB/pHAMbNK7f8KV9WFh6UqJ6q9tKsS5b8UYtueQ')
 api = tradeapi.REST(keys.key, keys.secret_key, keys.base_url, api_version='v2')
 
-# strategies will be imported
-# create control flow below
+# running strategy
+initialize(context=context)
 
-
-# api.submit_order(symbol="AAPL", qty=1, side="buy", type="market", time_in_force="gtc")
-
-# print(execution.order_value("MSFT", 1000))
-# price = api.get_last_quote("MSFT")
-# print(price)
-# print(cfg)
-# print(api.get_position("AMZN"))
-df = api.get_barset('AAPL', 'day', limit=20).df['AAPL']
-print(type(df.close))
-
+# need to have a time control for handle_data
+handle_data(context=context, data=data)
