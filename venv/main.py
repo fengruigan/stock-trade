@@ -25,7 +25,7 @@ while (run_time < 1000000):
     if (api.get_clock().__getattr__('timestamp').minute != curr_minute):
         curr_minute = api.get_clock().__getattr__('timestamp').minute
         run_time = run_time + 1
-        print("Strategy ran for " + run_time + " minutes")
+        print("Strategy ran for " + str(run_time) + " minutes")
         handle_data(context=context, data=data)
     else:
         time.sleep(5)

@@ -185,8 +185,12 @@ def order_target_percent(symbol: str, target_percent: float):
     """
     if (target_percent > 1):
         print("Percentage larger than 100%, input smaller target_percent")
-    if (target_percent <= 0):
-        print("Percentage must be > 0")
+        return None
+    if (target_percent < 0):
+        print("Percentage cannot be < 0")
+        return None
+    if (target_percent == 0):
+        return api.close_position(symbol).id
     for position in api.list_positions():
         if (symbol.__eq__(position.symbol)):
             percent = target_percent - (float(position.market_value) / float(api.get_account().portfolio_value))
