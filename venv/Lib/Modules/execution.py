@@ -11,7 +11,10 @@ from Lib.Modules.run import keys
 import alpaca_trade_api as tradeapi
 
 
-api = tradeapi.REST(keys.key, keys.secret_key, keys.base_url, api_version="v2")
+def init_keys():
+    key_id, secret_key = keys.get_keys(keys)
+    print(key_id)
+    api = tradeapi.REST(key_id, secret_key, keys._base_url, api_version="v2")
 
 
 def order(symbol: str, qty: int, side: str, type: str="market", time_in_force: str="gtc"):
@@ -48,19 +51,19 @@ def order_value(symbol: str, value: float):
         print("Order value cannot be 0")
         return None
     elif (value > 0):
-        if (int(api.get_account().buying_power) > value):
+        if (float(api.get_account().buying_power) > value):
             askprice = api.get_last_quote(symbol).askprice
             if (askprice != 0):
                 shares = int(value / askprice)
                 if (shares <= 0):
-                    print("Order value too low, purchasing 0 shares")
+                    print("Order value too low, attempting to buy $" + str(value) + " of " + symbol + ", but the askprice is $" + str(askprice))
                     return None
                 return order(symbol, shares, "buy")
             else:
-                print("Error reading askprice, askprice = 0")
+                print("Error reading askprice of " + symbol + ", askprice = 0")
                 return None
         else:
-            print("Error buying " + shares + " shares of " + symbol + ", not enough buying power")
+            print("Error buying " + symbol + ", not enough buying power")
             return None
     else:
         value = -value
@@ -73,11 +76,11 @@ def order_value(symbol: str, value: float):
                     if (bidprice != 0):
                         shares = int(value / bidprice)
                         if (shares == 0):
-                            print("Order value too low, selling 0 shares")
+                            print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
                             return None
                         return order(symbol, shares, "sell")
                     else:
-                        print("Error reading bidprice, bidprice = 0 ")
+                        print("Error reading bidprice of " + symbol + ", bidprice = 0 ")
                         return None
         print("Attempted to sell " + symbol + " but position not found")
         return None
@@ -104,7 +107,7 @@ def order_percent(symbol:str, percent:float):
     if (percent == 0):
         print("Percentage cannot be 0%")
         return None
-    value = int(api.get_account().portfolio_value) * percent
+    value = float(api.get_account().portfolio_value) * percent
     return order_value(symbol, value)
 
 
@@ -129,18 +132,18 @@ def order_target(symbol:str, target_share:int):
             if shares == 0:
                 return None
             elif shares > 0:
-                if (api.get_last_quote(symbol).askprice * shares < int(api.get_account().buying_power)):
+                if (api.get_last_quote(symbol).askprice * shares < float(api.get_account().buying_power)):
                     return order(symbol, shares, "buy")
                 else:
                     print(
-                        "Error buying " + shares + " shares of " + symbol + " with order_target, not enough buying power")
+                        "Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
                     return None
             else:
                 return order(symbol, -shares, "sell")
-    if (api.get_last_quote(symbol).askprice * target_share < int(api.get_account().buying_power)):
+    if (api.get_last_quote(symbol).askprice * target_share < float(api.get_account().buying_power)):
         return order(symbol, target_share, "buy")
     else:
-        print("Error buying " + target_share + " shares of " + symbol + ", not enough buying power")
+        print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
         return None
 
 
@@ -190,7 +193,10 @@ def order_target_percent(symbol: str, target_percent: float):
         print("Percentage cannot be < 0")
         return None
     if (target_percent == 0):
-        return api.close_position(symbol).id
+        for position in api.list_positions():
+            if (symbol.__eq__(position.symbol)):
+                return api.close_position(symbol).id
+        return None
     for position in api.list_positions():
         if (symbol.__eq__(position.symbol)):
             percent = target_percent - (float(position.market_value) / float(api.get_account().portfolio_value))
