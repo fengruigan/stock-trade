@@ -13,7 +13,7 @@ import time
 
 
 # use this method to update user API keys
-keys.set_keys(keys, 'PKHDD32BIDCMMLAN59WI', 'U50Ch0jCc/UcTj98rC0OGjSAMMyfwCJ/pvoZW5ts')
+keys.set_keys(keys, 'PKG437ZN51DHLNM9K6WH', 'v5cNSvt6mOMVu/4U2otOFR5WvGeeUznNz1hiV0uA')
 API.init_api(API)
 
 # # running strategy
@@ -30,27 +30,3 @@ while (run_time < 1000000):
         handle_data(context=context, data=data)
     else:
         time.sleep(5)
-
-# symbols = ['AMZN', 'AAPL','MSFT']
-# # px = (dict(sym, None) for sym in symbols)
-#
-# # print(px)
-# for sym in symbols:
-#     px = data.history(data, sym, 375)
-#     lower, upper = fibonacci_support(px[sym].close)
-#     ind2 = adx(px[sym], 120)
-#     print(sym)
-#     print("lower = " + str(lower))
-#     print("upper = " + str(upper))
-#     print("ind2 = " + str(ind2))
-
-# handle_data(context=context, data=data)
-
-# symbol = 'BILI'
-# px = data.history(data, symbol, 375)[symbol]
-# lower, upper = fibonacci_support(px.close)
-# ind2 = adx(px, 120)
-#
-# print("lower = " + str(lower))
-# print("upper = " + str(upper))
-# print("ind2 = " + str(ind2))

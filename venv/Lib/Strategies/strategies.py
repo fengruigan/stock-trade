@@ -63,7 +63,6 @@ def rebalance(context,data):
         A function to rebalance - all execution logic goes here
     '''
     for security in context.securities:
-        print(security + " position at " + str(context.target_position[security]))
         order_target_percent(security, context.target_position[security])
 
 def generate_target_position(context, data):
@@ -110,10 +109,6 @@ def signal_function(px, params, last_signal):
     """
     lower, upper = fibonacci_support(px.close)
     ind2 = adx(px, params['ADX_period'])
-
-    print("lower = " + str(lower))
-    print("upper = " + str(upper))
-    print("ind2 = " + str(ind2))
 
     if lower == -1:
         return -1
