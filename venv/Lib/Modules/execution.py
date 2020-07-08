@@ -63,7 +63,7 @@ def order_value(symbol: str, value: float):
         value = -value
         for position in API.api.list_positions():
             if (symbol.__eq__(position.symbol)):
-                if (value >= position.market_value):
+                if (value >= float(position.market_value)):
                     return API.api.close_position(symbol).id
                 else:
                     bidprice = API.api.get_last_quote(symbol).bidprice

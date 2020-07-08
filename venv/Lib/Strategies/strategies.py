@@ -18,7 +18,7 @@ def initialize(context):
         A function to define things to do at the start of the strategy
     """
     # universe selection
-    context.securities = ['AMZN', 'AAPL','MSFT']
+    context.securities = ['AMZN', 'AAPL']
 
     # define strategy parameters
     context.params = {'indicator_lookback':375,
@@ -26,8 +26,8 @@ def initialize(context):
                       'buy_signal_threshold':0.5,
                       'sell_signal_threshold':-0.5,
                       'ADX_period':120,
-                      'trade_freq':1,
-                      'leverage':1}
+                      'trade_freq':5,
+                      'leverage':2}
 
     # variable to control trading frequency
     context.bar_count = 0
@@ -85,16 +85,22 @@ def generate_signals(context, data):
     """
         A function to define define the signal generation
     """
-    try:
-        price_data = data.history(data, context.securities,
-            context.params['indicator_lookback'], context.params['indicator_freq'])
-    except:
-        print("error here!!!!!!!")
-        return
+    # try:
+    #     price_data = data.history(data, context.securities,
+    #         context.params['indicator_lookback'], context.params['indicator_freq'])
+    # except:
+    #     print("error here!!!!!!!")
+    #     return
 
     for security in context.securities:
-        px = price_data[security]
-        context.signals[security] = signal_function(px, context.params,
+        try:
+            px = data.history(data, security,
+                                      context.params['indicator_lookback'], context.params['indicator_freq'])
+        except:
+            print("error here!!!!!!!")
+            return
+        # px = price_data[security]
+        context.signals[security] = signal_function(px[security], context.params,
             context.signals[security])
         print(security + " has signal " + str(context.signals[security]))
 
