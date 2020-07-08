@@ -105,6 +105,10 @@ def signal_function(px, params, last_signal):
     lower, upper = fibonacci_support(px.close)
     ind2 = adx(px, params['ADX_period'])
 
+    print("lower = " + str(lower))
+    print("upper = " + str(upper))
+    print("ind2 = " + str(ind2))
+
     if lower == -1:
         return -1
     elif upper == -1:
