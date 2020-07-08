@@ -103,7 +103,7 @@ def signal_function(px, params, last_signal):
         The main trading logic goes here, called by generate_signals above
     """
     lower, upper = fibonacci_support(px.close)
-    ind2 = adx(px.high, px.low, px.close, params['ADX_period'])[-1]
+    ind2 = adx(px, params['ADX_period'])
 
     if lower == -1:
         return -1

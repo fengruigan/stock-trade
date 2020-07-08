@@ -81,18 +81,16 @@ def macd_diff(close, period_slow=26, period_fast=12, period_signal=9, fillna=Fal
     return ta.trend.macd_diff(close=close, n_slow=period_slow, n_fast=period_fast, n_sign=period_signal, fillna=fillna)
 
 
-def adx(high, low, close, period=14, fillna=False):
+def adx(px, period=14, fillna=False):
     """
     Average Directional Movement Index (ADX)
 
-    :param high: pd.Series of high prices
-    :param low: pd.Series of low prices
-    :param close: pd.Series of close prices
+    :param px: pd.Series of prices
     :param period: number of periods
     :param fillna: if true, fill nan values
     :return: pd.Series of adx features
     """
-    return ta.trend.adx(high=high, low=low, close=close, n=period, fillna=fillna)
+    return ta.trend.adx(high=px.high, low=px.low, close=px.close, n=period, fillna=fillna)[-1]
 
 
 def fibonacci_support(px):

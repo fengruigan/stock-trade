@@ -16,12 +16,12 @@ def initialize(context):
 
 
 def handle_data(context, data):
-    context.bar_count = context.bar_count + 1
-    if context.bar_count < context.params['trade_freq']:
-        return
-
-    # time to trade, call the strategy function
-    context.bar_count = 0
+    # context.bar_count = context.bar_count + 1
+    # if context.bar_count < context.params['trade_freq']:
+    #     return
+    #
+    # # time to trade, call the strategy function
+    # context.bar_count = 0
     rebalance(context)
 
 def rebalance(context):
