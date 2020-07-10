@@ -26,8 +26,8 @@ def initialize(context):
                       'buy_signal_threshold':0.5,
                       'sell_signal_threshold':-0.5,
                       'ADX_period':120,
-                      'trade_freq':5,
-                      'leverage':2}
+                      'trade_freq':1,
+                      'leverage':1}
 
     # variable to control trading frequency
     context.bar_count = 0
@@ -76,7 +76,8 @@ def generate_target_position(context, data):
         if context.signals[security] > context.params['buy_signal_threshold']:
             context.target_position[security] = weight
         elif context.signals[security] < context.params['sell_signal_threshold']:
-            context.target_position[security] = -weight
+            # context.target_position[security] = -weight
+            context.target_position[security] = 0
         else:
             context.target_position[security] = 0
 

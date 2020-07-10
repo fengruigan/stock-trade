@@ -188,8 +188,8 @@ def order_target_percent(symbol: str, target_percent: float):
         print("Percentage larger than 100%, input smaller target_percent")
         return None
     if (target_percent < 0):
-        print("Percentage cannot be < 0")
-        return None
+        print("Shorting is currently not supported")
+        target_percent == 0
     if (target_percent == 0):
         for position in API.api.list_positions():
             if (symbol.__eq__(position.symbol)):

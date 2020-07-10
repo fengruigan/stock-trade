@@ -21,9 +21,9 @@ def ema(close, period=12, fillna=False):
     :param close: pd.Series of close prices
     :param period: number of periods
     :param fillna: if true, fill nan values
-    :return: pd.Series of ema features
+    :return: the last value of pd.Series of ema features
     """
-    return ta.trend.ema_indicator(close=close, periods=period, fillna=fillna)
+    return ta.trend.ema_indicator(close=close, periods=period, fillna=fillna)[-1]
 
 
 def sma(close, period=12, fillna=False):
@@ -33,9 +33,9 @@ def sma(close, period=12, fillna=False):
     :param close: pd.Series of close prices
     :param period: number of periods
     :param fillna: if true, fill nan values
-    :return: pd.Series of sma features
+    :return: the last value of pd.Series of sma features
     """
-    return ta.trend.sma_indicator(close=close, n=period, fillna=fillna)
+    return ta.trend.sma_indicator(close=close, n=period, fillna=fillna)[-1]
 
 
 def macd(close, period_slow=26, period_fast=12, fillna=False):
@@ -46,9 +46,9 @@ def macd(close, period_slow=26, period_fast=12, fillna=False):
     :param period_slow: number of periods for slow ma
     :param period_fast: number of periods for fast ma
     :param fillna: if true, fill nan values
-    :return: pd.Series of macd features
+    :return: the last value of pd.Series of macd features
     """
-    return ta.trend.macd(close=close, n_slow=period_slow, n_fast=period_fast, fillna=fillna)
+    return ta.trend.macd(close=close, n_slow=period_slow, n_fast=period_fast, fillna=fillna)[-1]
 
 
 def macd_signal(close, period_slow=26, period_fast=12, period_signal=9, fillna=False):
@@ -61,9 +61,9 @@ def macd_signal(close, period_slow=26, period_fast=12, period_signal=9, fillna=F
     :param period_fast: number of periods for fast ma
     :param period_signal: number of periods for signal
     :param fillna: if true, fill nan values
-    :return: pd.Series of macd_signal features
+    :return: the last value of pd.Series of macd_signal features
     """
-    return ta.trend.macd_signal(close=close, n_slow=period_slow, n_fast=period_fast, n_sign=period_signal, fillna=fillna)
+    return ta.trend.macd_signal(close=close, n_slow=period_slow, n_fast=period_fast, n_sign=period_signal, fillna=fillna)[-1]
 
 
 def macd_diff(close, period_slow=26, period_fast=12, period_signal=9, fillna=False):
@@ -76,9 +76,9 @@ def macd_diff(close, period_slow=26, period_fast=12, period_signal=9, fillna=Fal
     :param period_fast: number of periods for fast ma
     :param period_signal: number of periods for signal
     :param fillna: if true, fill nan values
-    :return: pd.Series of macd_diff features
+    :return: the last value of pd.Series of macd_diff features
     """
-    return ta.trend.macd_diff(close=close, n_slow=period_slow, n_fast=period_fast, n_sign=period_signal, fillna=fillna)
+    return ta.trend.macd_diff(close=close, n_slow=period_slow, n_fast=period_fast, n_sign=period_signal, fillna=fillna)[-1]
 
 
 def adx(px, period=14, fillna=False):
@@ -88,7 +88,7 @@ def adx(px, period=14, fillna=False):
     :param px: pd.Series of prices
     :param period: number of periods
     :param fillna: if true, fill nan values
-    :return: pd.Series of adx features
+    :return: The last value in the pd.Series
     """
     return ta.trend.adx(high=px.high, low=px.low, close=px.close, n=period, fillna=fillna)[-1]
 
@@ -128,3 +128,66 @@ def fibonacci_support(px):
         upper_dist = round(100.0 * (sups[idx + 1] / last_price - 1), 2)
 
     return lower_dist, upper_dist
+
+
+def bollinger_band(volume, period=20, fillna=False):
+    """
+    Bollinger Band
+
+    :param volume: volume data pd.Series
+    :param period: period for bollinger band
+    :return: The last value in upper, middle, and low band
+    """
+
+    def bollinger_mavg(close, n=20, fillna=False):
+        """Bollinger Bands (BB)     Mid Band
+        N-period simple moving average (MA).
+        https://en.wikipedia.org/wiki/Bollinger_Bands
+        Args:
+            close(pandas.Series): dataset 'Close' column.
+            n(int): n period.
+            fillna(bool): if True, fill nan values.
+        Returns:
+            pandas.Series: New feature generated.
+        """
+        indicator = BollingerBands(close=close, n=n, fillna=fillna)
+        return indicator.bollinger_mavg()
+
+
+    def bollinger_hband(close, n=20, ndev=2, fillna=False):
+        """Bollinger Bands (BB)     Upper Band
+        Upper band at K times an N-period standard deviation above the moving
+        average (MA + Kdeviation).
+        https://en.wikipedia.org/wiki/Bollinger_Bands
+        Args:
+            close(pandas.Series): dataset 'Close' column.
+            n(int): n period.
+            ndev(int): n factor standard deviation
+            fillna(bool): if True, fill nan values.
+        Returns:
+            pandas.Series: New feature generated.
+        """
+        indicator = BollingerBands(close=close, n=n, ndev=ndev, fillna=fillna)
+        return indicator.bollinger_hband()
+
+
+    def bollinger_lband(close, n=20, ndev=2, fillna=False):
+        """Bollinger Bands (BB)     Lower Band
+        Lower band at K times an N-period standard deviation below the moving
+        average (MA − Kdeviation).
+        https://en.wikipedia.org/wiki/Bollinger_Bands
+        Args:
+            close(pandas.Series): dataset 'Close' column.
+            n(int): n period.
+            ndev(int): n factor standard deviation
+            fillna(bool): if True, fill nan values.
+        Returns:
+            pandas.Series: New feature generated.
+        """
+        indicator = BollingerBands(close=close, n=n, ndev=ndev, fillna=fillna)
+        return indicator.bollinger_lband()
+
+    upper = bollinger_hband(volume=volume, period=period, fillna=fillna)
+    mid = bollinger_mavg(volume=volume, period=period, fillna=fillna)
+    lower = bollinger_lband(volume=volume, period=period, fillna=fillna)
+    return upper[-1], mid[-1], lower[-1]
