@@ -11,6 +11,7 @@ import more when needed
 import pandas as pd
 import alpaca_trade_api as tradeapi
 import ta.trend
+import ta.volatility
 import bisect
 
 
@@ -23,7 +24,7 @@ def ema(close, period=12, fillna=False):
     :param fillna: if true, fill nan values
     :return: the last value of pd.Series of ema features
     """
-    return ta.trend.ema_indicator(close=close, periods=period, fillna=fillna)[-1]
+    return ta.trend.ema_indicator(close=close, n=period, fillna=fillna)[-1]
 
 
 def sma(close, period=12, fillna=False):
@@ -150,7 +151,7 @@ def bollinger_band(volume, period=20, fillna=False):
         Returns:
             pandas.Series: New feature generated.
         """
-        indicator = BollingerBands(close=close, n=n, fillna=fillna)
+        indicator = ta.volatility.BollingerBands(close=close, n=n, fillna=fillna)
         return indicator.bollinger_mavg()
 
 
@@ -167,7 +168,7 @@ def bollinger_band(volume, period=20, fillna=False):
         Returns:
             pandas.Series: New feature generated.
         """
-        indicator = BollingerBands(close=close, n=n, ndev=ndev, fillna=fillna)
+        indicator = ta.volatility.BollingerBands(close=close, n=n, ndev=ndev, fillna=fillna)
         return indicator.bollinger_hband()
 
 
@@ -184,10 +185,10 @@ def bollinger_band(volume, period=20, fillna=False):
         Returns:
             pandas.Series: New feature generated.
         """
-        indicator = BollingerBands(close=close, n=n, ndev=ndev, fillna=fillna)
+        indicator = ta.volatility.BollingerBands(close=close, n=n, ndev=ndev, fillna=fillna)
         return indicator.bollinger_lband()
 
-    upper = bollinger_hband(volume=volume, period=period, fillna=fillna)
-    mid = bollinger_mavg(volume=volume, period=period, fillna=fillna)
-    lower = bollinger_lband(volume=volume, period=period, fillna=fillna)
+    upper = bollinger_hband(close=volume, n=period, fillna=fillna)
+    mid = bollinger_mavg(close=volume, n=period, fillna=fillna)
+    lower = bollinger_lband(close=volume, n=period, fillna=fillna)
     return upper[-1], mid[-1], lower[-1]

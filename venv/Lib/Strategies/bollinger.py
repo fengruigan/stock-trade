@@ -14,7 +14,7 @@ def initialize(context):
         A function to define things to do at the start of the strategy
     """
     # universe selection
-    context.securities = ['BA', 'LUV']
+    context.securities = ['GNUS', 'WKHS']
 
     # define strategy parameters
     context.params = {'indicator_lookback': 375,
@@ -93,16 +93,15 @@ def generate_signals(context, data):
     """
     for security in context.securities:
         try:
-            px = data.history(security,
-                                      context.params['indicator_lookback'],
-                                      context.params['indicator_freq'])[security].close
-            vx = data.history(security,
-                                       context.params['indicator_lookback'],
-                                       context.params['indicator_freq'])[security].volume
-            context.signals[security] = signal_function(px, vx, context.params)
+            px = data.history(data, security, context.params['indicator_lookback'], context.params['indicator_freq'])[security].close
+            vx = data.history(data, security, context.params['indicator_lookback'], context.params['indicator_freq'])[security].volume
+
         except:
+            print("ERROR acquiring data")
             return
 
+        context.signals[security] = signal_function(px, vx, context.params)
+        print(security + " has signal " + str(context.signals[security]))
 
 def signal_function(px, vx, params):
     """
@@ -111,6 +110,13 @@ def signal_function(px, vx, params):
     upper, mid, lower = bollinger_band(vx, params['BBands_period'])
     ind2 = ema(px, params['SMA_period_short'])
     ind3 = ema(px, params['SMA_period_long'])
+
+    # print("upper: " + str(upper))
+    # print("mid: " + str(mid))
+    # print("lower: " + str(lower))
+    # print("ind2: " + str(ind2))
+    # print("ind3: " + str(ind3))
+
     last_vx = vx[-1]
     dist_to_upper = 100 * (upper - last_vx) / (upper - lower)
 
