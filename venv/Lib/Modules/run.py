@@ -1,5 +1,12 @@
+"""
+Contains the user configurations and system classes
+"""
+
 import alpaca_trade_api as tradeapi
 
+"""
+User config
+"""
 
 class API:
     api = None
@@ -19,6 +26,10 @@ class keys:
     def get_keys(cls):
         return cls._key, cls._secret_key
 
+
+"""
+System classes
+"""
 
 class context:
     def __init__(cls):

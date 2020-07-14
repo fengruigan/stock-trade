@@ -7,7 +7,8 @@ or wait for orders to be filled
 
 
 """
-from Lib.Modules.run import API
+from Lib.Backtest.run import API
+from Lib.Backtest.account import account
 
 
 def order(symbol: str, qty: int, side: str, type: str="market", time_in_force: str="gtc"):
@@ -21,7 +22,7 @@ def order(symbol: str, qty: int, side: str, type: str="market", time_in_force: s
     :param time_in_force: day, gtc, opg, cls, ioc, fok
     :return: returns order id
     """
-    return API.api.submit_order(symbol, qty, side, type, time_in_force).id
+    return account.submit_order(account, symbol, qty, side, type, time_in_force)
 
 
 def order_value(symbol: str, value: float):
@@ -44,8 +45,8 @@ def order_value(symbol: str, value: float):
         print("Order value cannot be 0")
         return None
     elif (value > 0):
-        if (float(API.api.get_account().buying_power) > value):
-            askprice = API.api.get_last_quote(symbol).askprice
+        if (float(accoung.buying_power) > value):
+            askprice = API.api.get_last_quote(symbol).askprice  # this askprice will just be a close price for simplicity sake
             if (askprice != 0):
                 shares = int(value / askprice)
                 if (shares <= 0):
@@ -61,12 +62,12 @@ def order_value(symbol: str, value: float):
             return None
     else:
         value = -value
-        for position in API.api.list_positions():
+        for position in account.list_positions():
             if (symbol.__eq__(position.symbol)):
                 if (value >= float(position.market_value)):
                     return API.api.close_position(symbol).id
                 else:
-                    bidprice = API.api.get_last_quote(symbol).bidprice
+                    bidprice = API.api.get_last_quote(symbol).bidprice # this bidprice will just be a close price for simplicity sake
                     if (bidprice != 0):
                         shares = int(value / bidprice)
                         if (shares == 0):
@@ -127,7 +128,7 @@ def order_target(symbol:str, target_share:int):
             if shares == 0:
                 return None
             elif shares > 0:
-                if (API.api.get_last_quote(symbol).askprice * shares < float(API.api.get_account().buying_power)):
+                if (API.api.get_last_quote(symbol).askprice * shares < float(API.api.get_account().buying_power)):  # this askprice will just be a close price for simplicity sake
                     print("Placing order to buy " + str(shares) + " shares of " + symbol)
                     return order(symbol, shares, "buy")
                 else:
@@ -137,7 +138,7 @@ def order_target(symbol:str, target_share:int):
             else:
                 print("Placing order to sell " + str(shares) + " shares of " + symbol)
                 return order(symbol, -shares, "sell")
-    if (API.api.get_last_quote(symbol).askprice * target_share < float(API.api.get_account().buying_power)):
+    if (API.api.get_last_quote(symbol).askprice * target_share < float(API.api.get_account().buying_power)):  # this askprice will just be a close price for simplicity sake
         print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
         return order(symbol, target_share, "buy")
     else:

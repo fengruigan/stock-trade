@@ -1,19 +1,25 @@
 """
 This is the main script for backtesting
 """
-from Lib.Modules.run import API, keys
+from Lib.Backtest.run import API, keys
 import pandas as pd
-import alpaca_trade_api as tradeapi
-import matplotlib.pyplot as plt
+from Lib.Backtest.account import account
+from Lib.Backtest import execution as exe
 
 
 keys.set_keys(keys, 'PK6Y5SRDKN61WWJXTMFK', 'qfgZ/029E5uXShxMFihldRyr4/qEQESe2L5gyYpD')
 API.init_api(API)
 
-time_zone = 'America/New_York'
-start = pd.Timestamp("2017-01-01", tz=time_zone)
-end = pd.Timestamp("2018-01-01", tz=time_zone)
-day_progression = pd.to_timedelta("1 day")
+exe.order("AAPL", 1, "buy")
+print(account.list_positions(account))
+
+
+
+
+# time_zone = 'America/New_York'
+# start = pd.Timestamp("2017-01-01", tz=time_zone)
+# end = pd.Timestamp("2018-01-01", tz=time_zone)
+# day_progression = pd.to_timedelta("1 day")
 
 # setup account info
 
@@ -47,17 +53,6 @@ day_progression = pd.to_timedelta("1 day")
 # aapl = API.api.polygon.historic_agg_v2('AAPL', 1, 'minute', _from='2017-01-01', to='2017-01-03')[500]
 # time = aapl.timestamp
 # print(time)
-
-time = pd.Timestamp('2017-01-03 14:55:00-05:00')
-print(time)
-quotes = API.api.polygon.historic_quotes_v2("AAPL", time, reverse=True)
-# print(quotes[0].participant_timestamp)
-# for quote in quotes:
-    # print(quote.participant_timestamp.hour)
-    # if quote.participant_timestamp.hour == 12:
-    #     print(quote.participant_timestamp.hour)
-    #     print(quote)
-    #     break
 
 # times = (point.timestamp.ams8() for point in aapl if point.timestamp.hour in range(10, 16))
 # for time in times:

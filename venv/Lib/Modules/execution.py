@@ -63,7 +63,7 @@ def order_value(symbol: str, value: float):
         value = -value
         for position in API.api.list_positions():
             if (symbol.__eq__(position.symbol)):
-                if (value >= float(position.market_value)):
+                if (value >= float(position.market_value)):  # position.market_value should be get_last_quote(symbol) instead?
                     return API.api.close_position(symbol).id
                 else:
                     bidprice = API.api.get_last_quote(symbol).bidprice
@@ -166,7 +166,7 @@ def order_target_value(symbol: str, target_value: float):
         return None
     for position in API.api.list_positions():
         if (symbol.__eq__(position.symbol)):
-            value = target_value - float(position.market_value)
+            value = target_value - float(position.market_value)  # position.market_value should be get_last_quote(symbol) instead?
             return order_value(symbol, value)
     return order_value(symbol, target_value)
 
@@ -197,6 +197,6 @@ def order_target_percent(symbol: str, target_percent: float):
         return None
     for position in API.api.list_positions():
         if (symbol.__eq__(position.symbol)):
-            percent = target_percent - (float(position.market_value) / float(API.api.get_account().portfolio_value))
+            percent = target_percent - (float(position.market_value) / float(API.api.get_account().portfolio_value)) # position.market_value should be get_last_quote(symbol) instead?
             return order_percent(symbol, percent)
     return order_percent(symbol, target_percent)
