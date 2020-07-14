@@ -12,7 +12,7 @@ class keys:
     _secret_key = None
     _base_url = 'https://paper-api.alpaca.markets'
 
-    def set_keys(cls, key, secret_key):
+    def set_keys(cls, key: str, secret_key: str):
         cls._key = key
         cls._secret_key = secret_key
 
@@ -26,9 +26,9 @@ class context:
 
 
 class data:
-    def current(cls, symbols, timeframe='1Min'):
+    def current(cls, symbols: str, timeframe: str='1Min'):
         return API.api.get_barset(symbols=symbols, timeframe=timeframe, limit=1).df
 
 
-    def history(cls, symbols, lookback=253, timeframe='1Min'):
+    def history(cls, symbols: str, lookback: int=253, timeframe: str='1Min'):
         return API.api.get_barset(symbols=symbols, timeframe=timeframe, limit=lookback).df

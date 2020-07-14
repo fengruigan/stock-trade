@@ -14,7 +14,18 @@ def initialize(context):
         A function to define things to do at the start of the strategy
     """
     # universe selection
-    context.securities = ['GNUS', 'WKHS']
+    context.securities = ['HTZ',
+                            'INO',
+                            'GNUS',
+                            'NIO',
+                            'MVIS',
+                            'WIMI',
+                            'WKHS',
+                            'MARK',
+                            'SHIP',
+                            'IDEX',
+                            'XSPA',
+                            'AYTU']
 
     # define strategy parameters
     context.params = {'indicator_lookback': 375,
@@ -101,7 +112,7 @@ def generate_signals(context, data):
             return
 
         context.signals[security] = signal_function(px, vx, context.params)
-        print(security + " has signal " + str(context.signals[security]))
+        # print(security + " has signal " + str(context.signals[security]))
 
 def signal_function(px, vx, params):
     """
