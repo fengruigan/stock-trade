@@ -5,7 +5,7 @@ from Lib.Backtest.run import API, data
 from Lib.Backtest.account import Account
 
 
-def order(symbol: str, qty: int, side: str, type: str="market", time_in_force: str="gtc"):
+def order(symbol: str, qty: int, side: str, timestamp: str, type: str="market", time_in_force: str="gtc"):
     """
     This method is a refactoring of the original alpaca submit_order() method
 
@@ -16,7 +16,7 @@ def order(symbol: str, qty: int, side: str, type: str="market", time_in_force: s
     :param time_in_force: day, gtc, opg, cls, ioc, fok
     :return:
     """
-    return Account.submit_order(Account, symbol, qty, side, type, time_in_force)
+    return Account.submit_order(Account, symbol, qty, side, timestamp, type, time_in_force)
 
 
 def order_value(symbol: str, value: float, timestamp: str):
@@ -47,7 +47,7 @@ def order_value(symbol: str, value: float, timestamp: str):
                     print("Order value too low, attempting to buy $" + str(value) + " of " + symbol + ", but the askprice is $" + str(askprice))
                     return
                 print("Placing order to buy " + str(shares) + " shares of " + symbol)
-                return order(symbol, shares, "buy")
+                return order(symbol, shares, "buy", timestamp)
             else:
                 print("Error reading askprice of " + symbol + ", askprice = 0")
                 return
@@ -68,7 +68,7 @@ def order_value(symbol: str, value: float, timestamp: str):
                         print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
                         return
                     print("Placing order to sell " + str(shares) + " shares of " + symbol)
-                    return order(symbol, shares, "sell")
+                    return order(symbol, shares, "sell", timestamp)
                 else:
                     print("Error reading bidprice of " + symbol + ", bidprice = 0 ")
                     return
@@ -125,17 +125,17 @@ def order_target(symbol:str, target_share:int, timestamp: str):
         elif shares > 0:
             if (data.current(data, symbol=symbol, end=timestamp)[symbol].close * shares < Account.buying_power):  # this askprice will just be a close price for simplicity sake
                 print("Placing order to buy " + str(shares) + " shares of " + symbol)
-                return order(symbol, shares, "buy")
+                return order(symbol, shares, "buy", timestamp)
             else:
                 print(
                     "Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
                 return
         else:
             print("Placing order to sell " + str(shares) + " shares of " + symbol)
-            return order(symbol, -shares, "sell")
+            return order(symbol, -shares, "sell", timestamp)
     if (data.current(data, symbol=symbol, end=timestamp)[symbol].close * target_share < Account.buying_power):  # this askprice will just be a close price for simplicity sake
         print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
-        return order(symbol, target_share, "buy")
+        return order(symbol, target_share, "buy", timestamp)
     else:
         print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
         return
