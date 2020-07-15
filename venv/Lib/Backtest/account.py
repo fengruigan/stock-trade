@@ -18,22 +18,22 @@ class Position:
             attr=self.__dict__
         )
 
-class account:
+class Account:
 
     positions = []
-    portfolio_value = 0
+    portfolio_value = 0.0
     leverage = 1
-    buying_power = 0
+    buying_power = 0.0
 
     def set_capital(cls, qty: int=100000, leverage: int=1):
         cls.portfolio_value = qty
         cls.buying_power = qty * leverage
 
-    def calculate_portfolio(cls):
+    def calculate_portfolio(cls, timestamp: str):
         pass
 
     def submit_order(cls, symbol: str, qty: int, side: str, type: str='market', time_in_force: str='gtc'):
-        pos = cls.get_position(account, symbol=symbol)
+        pos = cls.get_position(cls, symbol=symbol)
         if (side.__eq__('buy')):
             if pos:
                 pos.set_qty(new_qty= pos.qty + qty)
@@ -61,13 +61,12 @@ class account:
         :param symbol: specified asses
         :return:
         """
-        pos = cls.get_position(account, symbol=symbol)
+        pos = cls.get_position(cls, symbol=symbol)
         if pos is None:
-            return
+            print("Position not found")
         else:
             # calculate portfolio
             cls.positions.remove(pos)
-            return
 
     def close_all_positions(cls):
         """
@@ -76,7 +75,9 @@ class account:
         :return:
         """
         for pos in cls.positions:
-            close_position(pos.symbol)
+            # calculate portfolio
+            pass
+        cls.positions = []
         return
 
     def get_position(cls, symbol: str):

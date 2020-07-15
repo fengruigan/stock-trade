@@ -3,6 +3,7 @@ Contains the user configurations and system classes
 """
 
 import alpaca_trade_api as tradeapi
+import pandas as pd
 
 """
 User config
@@ -65,3 +66,27 @@ class data:
               so here I decided to make things less prone to error by taking symbol data one by one
         """
         return API.api.get_barset(symbols=symbol, timeframe=timeframe, limit=lookback, end=end).df
+
+class Clock:
+    time_zone = 'America/New_York'
+    start = "2017-01-01T00:00:00-05:00"
+    end = "2018-01-01T00:00:00-05:00"
+    day_progression = pd.to_timedelta("1 day")
+    day_timestamp = []
+    curr_time = None
+
+    def init_clock(cls, start: str, end: str, timeframe: str="minute"):
+        """
+        initialize clock for backtest
+
+        :param start: isoformat pd.timestamp
+        :param end: isoformat pd.timestamp
+        :param timeframe: minute or day, determines the frequency of data acquisition
+        :return:
+        """
+        cls.start = pd.Timestamp(start, tz=time_zone)
+        cls.end = pd.Timestamp(end, tz=time_zone)
+
+    def get_time(self):
+        pass
+

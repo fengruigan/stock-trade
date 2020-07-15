@@ -1,25 +1,39 @@
 """
 This is the main script for backtesting
 """
-from Lib.Backtest.run import API, keys
+from Lib.Backtest.run import API, keys, data
 import pandas as pd
-from Lib.Backtest.account import account
+from Lib.Backtest.account import Account
 from Lib.Backtest import execution as exe
 
 
-keys.set_keys(keys, 'PK6Y5SRDKN61WWJXTMFK', 'qfgZ/029E5uXShxMFihldRyr4/qEQESe2L5gyYpD')
+keys.set_keys(keys, 'PKFE10XOBD7S4S5PYW4S', 'OQaJy/hcLjrNSNubTbUTpqbH21ybe/Dow65YYBfu')
 API.init_api(API)
 
-exe.order("AAPL", 1, "buy")
-print(account.list_positions(account))
+# exe.order("AAPL", 1, "buy")
+# exe.order("AMZN", 1, "buy")
+# exe.order("TSLA", 1, "buy")
+# exe.order("GNUS", 10, "buy")
+# print(Account.list_positions(Account))
+# Account.close_all_positions(Account)
+# print(Account.list_positions(Account))
 
 
 
+time = pd.Timestamp('2019-07-16', tz='America/New_York').isoformat()
+ti = '2019-07-15 15:59:00-04:00'
+his = API.api.polygon.historic_agg_v2('AAPL', 1, 'minute', _from='2019-07-15', to='2019-07-15')
+t = his[80].timestamp.isoformat()
+print(his[80].timestamp)
 
-# time_zone = 'America/New_York'
-# start = pd.Timestamp("2017-01-01", tz=time_zone)
-# end = pd.Timestamp("2018-01-01", tz=time_zone)
-# day_progression = pd.to_timedelta("1 day")
+curr = data.current(data, "AAPL", end=t)
+# print(curr)
+print(curr["AAPL"].close)
+#
+# px = API.api.get_barset('AMZN', limit=1, end=t, timeframe='1Min').df
+# print(px)
+
+
 
 # setup account info
 
