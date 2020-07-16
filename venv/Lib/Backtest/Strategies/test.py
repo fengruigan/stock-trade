@@ -1,7 +1,9 @@
 """
 test backtest strategy
+Data timeframe: minute
 """
 from Lib.Backtest.run import Clock
+from Lib.Backtest.account import Account
 from Lib.Backtest.execution import order_target_percent
 from Lib.Modules.indicators import fibonacci_support, adx
 
@@ -19,11 +21,8 @@ def initialize(context):
                       'buy_signal_threshold':0.5,
                       'sell_signal_threshold':-0.5,
                       'ADX_period':120,
-                      'trade_freq':1,
+                      'trade_freq':5,
                       'leverage':1}
-
-    # variable to control trading frequency
-    context.bar_count = 0
 
     # variables to track signals and target portfolio
     context.signals = dict((security,0) for security in context.securities)
@@ -34,18 +33,10 @@ def handle_data(context, data):
     """
         A function to define things to do at every bar
     """
-    # run clock
-
-
-
-    context.bar_count = context.bar_count + 1
-    if context.bar_count < context.params['trade_freq']:
-        return
-
     # time to trade, call the strategy function
     context.bar_count = 0
     run_strategy(context, data)
-
+    Clock.pass_time(Clock, Account)
 
 def run_strategy(context, data):
     """
@@ -60,7 +51,7 @@ def rebalance(context,data):
         A function to rebalance - all execution logic goes here
     '''
     for security in context.securities:
-        order_target_percent(security, context.target_position[security])
+        order_target_percent(security, context.target_position[security], Clock.curr_time)
 
 def generate_target_position(context, data):
     """
@@ -91,15 +82,14 @@ def generate_signals(context, data):
 
     for security in context.securities:
         try:
-            px = data.history(data, security,
-                                      context.params['indicator_lookback'], context.params['indicator_freq'])
+            px = data.history(data, security, Clock.curr_time, context.params['indicator_lookback'], context.params['indicator_freq'])
         except:
             print("error here!!!!!!!")
             return
         # px = price_data[security]
         context.signals[security] = signal_function(px[security], context.params,
             context.signals[security])
-        print(security + " has signal " + str(context.signals[security]))
+        # print(security + " has signal " + str(context.signals[security]))
 
 def signal_function(px, params, last_signal):
     """

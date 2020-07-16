@@ -4,6 +4,7 @@ Contains the user configurations and system classes
 
 import alpaca_trade_api as tradeapi
 import pandas as pd
+# from Lib.Backtest.account import Account
 
 """
 User config
@@ -31,12 +32,13 @@ class keys:
 System classes
 """
 
-class context:
+class Context:
     def __init__(cls):
         pass
 
 
-class data:
+class Data:
+
     def current(cls, symbol: str, end:str, timeframe: str='1Min'):
         """
         Get the current barset at end date
@@ -75,38 +77,57 @@ class Clock:
     start = "2017-01-01T00:00:00-05:00"
     end = "2018-01-01T00:00:00-05:00"
     timeframe = "minute"
-    day_delta = pd.to_timedelta("1 day")
+    day_delta = pd.to_timedelta('1 day')
+    minute_delta = pd.to_timedelta('1 minute')
     timeline = [] ##### make this a fixed list of timestamp with 1 min delta
     curr_time = None
+    time_idx = 0
+    is_running = False
 
-    def init_clock(cls, start: str, end: str, timeframe: str="minute"):
+    def init_clock(cls, start: str, end: str, minute_delta: str='1 minute', timeframe: str='minute'):
         """
         initialize clock for backtest, generate the timeline for later use
 
         :param start: isoformat pd.timestamp
         :param end: isoformat pd.timestamp
+        :param minute_delta: difference between minute level timestamps, usually set to be the trade_freq of the strategy
         :param timeframe: minute or day, determines the frequency of data acquisition
         :return:
         """
         cls.start = pd.Timestamp(start, tz=cls.time_zone)
         cls.end = pd.Timestamp(end, tz=cls.time_zone)
         cls.timeframe = timeframe
-        day = pd.Timestamp(start)
-        end = pd.Timestamp(end)
+        cls.minute_delta = pd.to_timedelta(minute_delta)
+        day = cls.start
+        end = cls.end
         while (day != end):
             if (day.dayofweek != 6 and day.dayofweek != 7):  ## skip weekends not skipping holidays
-                cls.get_day_timeline(Clock, day)
+                cls.get_day_timeline(Clock, day, cls.minute_delta)
             day = day + cls.day_delta
+        cls.curr_time = cls.timeline[cls.time_idx]
+        cls.is_running = True
 
 
-    def get_day_timeline(cls, day: str):
-        start = day + pd.to_timedelta("9 hour 30 minute")
-        minute_delta = pd.to_timedelta("1 minute")
-        while (start <= (day + pd.to_timedelta("16 hour"))):
+    def get_day_timeline(cls, day: str, minute_delta):
+        """
+        append a list of minute timestamps to the class timeline
+        :param day: current day
+        :param minute_delta: difference between two timestamps
+        :return:
+        """
+        start = day + pd.to_timedelta("9 hour 30 minute")  ## set start of day to 9:30 am
+        while (start <= (day + pd.to_timedelta("16 hour"))):  ## set end of day to 4:00 pm
             cls.timeline.append(start.isoformat())
             start = start + minute_delta
 
 
-    def get_time(cls):
-        pass
+    def pass_time(cls, account):
+        cls.time_idx = cls.time_idx + 1
+        if (cls.time_idx < len(cls.timeline)):
+            cls.curr_time = cls.timeline[cls.time_idx]
+            # account.portfolio_history.append(account.portfolio_value)
+            # account.benchmark.append(account.benchmark_value)
+            print(cls.curr_time)
+        else:
+            cls.is_running = False
 

@@ -1,11 +1,11 @@
 """
 module that handles order execution for backtests
 """
-from Lib.Backtest.run import API, data
+from Lib.Backtest.run import Data, Clock
 from Lib.Backtest.account import Account
 
 
-def order(symbol: str, qty: int, side: str, timestamp: str, type: str="market", time_in_force: str="gtc"):
+def order(symbol: str, qty: int, side: str, timestamp: str=Clock.curr_time, type: str="market", time_in_force: str="gtc"):
     """
     This method is a refactoring of the original alpaca submit_order() method
 
@@ -19,7 +19,7 @@ def order(symbol: str, qty: int, side: str, timestamp: str, type: str="market", 
     return Account.submit_order(Account, symbol, qty, side, timestamp, type, time_in_force)
 
 
-def order_value(symbol: str, value: float, timestamp: str):
+def order_value(symbol: str, value: float, timestamp: str=Clock.curr_time):
     """
     Create an order to specified asset for specified amount of value
 
@@ -36,48 +36,48 @@ def order_value(symbol: str, value: float, timestamp: str):
         method will close position (sell all) for "AAPL" with order id returned
     """
     if (value == 0):
-        print("Order value cannot be 0")
+        # print("Order value cannot be 0")
         return
     elif (value > 0):
         if (Account.buying_power > value):
-            askprice = data.current(data, symbol=symbol, end=timestamp)[symbol].close  # this askprice will just be a close price for simplicity sake
+            askprice = float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close)  # this askprice will just be a close price for simplicity sake
             if (askprice != 0):
                 shares = int(value / askprice)
                 if (shares <= 0):
-                    print("Order value too low, attempting to buy $" + str(value) + " of " + symbol + ", but the askprice is $" + str(askprice))
+                    # print("Order value too low, attempting to buy $" + str(value) + " of " + symbol + ", but the askprice is $" + str(askprice))
                     return
-                print("Placing order to buy " + str(shares) + " shares of " + symbol)
+                # print("Placing order to buy " + str(shares) + " shares of " + symbol)
                 return order(symbol, shares, "buy", timestamp)
             else:
                 print("Error reading askprice of " + symbol + ", askprice = 0")
                 return
         else:
-            print("Error buying " + symbol + ", not enough buying power")
+            # print("Error buying " + symbol + ", not enough buying power")
             return
     else:
         value = -value
         pos = Account.get_position(Account, symbol=symbol)
         if pos:
-            if (value >= float(position.market_value)): ######################## this needs a rewrite
-                return Account.close_position(Account, symbol)
+            if (value >= pos.market_value): ######################## this needs a rewrite
+                return Account.close_position(Account, symbol, timestamp)
             else:
-                bidprice = data.current(data, symbol=symbol, end=timestamp)[symbol].close # this bidprice will just be a close price for simplicity sake
+                bidprice = float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) # this bidprice will just be a close price for simplicity sake
                 if (bidprice != 0):
                     shares = int(value / bidprice)
                     if (shares == 0):
-                        print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
+                        # print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
                         return
-                    print("Placing order to sell " + str(shares) + " shares of " + symbol)
+                    # print("Placing order to sell " + str(shares) + " shares of " + symbol)
                     return order(symbol, shares, "sell", timestamp)
                 else:
                     print("Error reading bidprice of " + symbol + ", bidprice = 0 ")
                     return
         else:
-            print("Attempted to sell " + symbol + " but position not found")
+            # print("Attempted to sell " + symbol + " but position not found")
             return
 
 
-def order_percent(symbol: str, percent: float, timestamp: str):
+def order_percent(symbol: str, percent: float, timestamp: str=Clock.curr_time):
     """
     Create an order to specified asset for amount based on the percent of the current portfolio
 
@@ -93,16 +93,16 @@ def order_percent(symbol: str, percent: float, timestamp: str):
         method will attempt to sell 1 share of "AAPL" with order id returned
     """
     if (abs(percent) > 1):
-        print("Percentage larger than 100%, input smaller percentage")
+        # print("Percentage larger than 100%, input smaller percentage")
         return
     if (percent == 0):
-        print("Percentage cannot be 0%")
+        # print("Percentage cannot be 0%")
         return
     value = Account.portfolio_value * percent
     return order_value(symbol=symbol, value=value, timestamp=timestamp)
 
 
-def order_target(symbol:str, target_share:int, timestamp: str):
+def order_target(symbol:str, target_share:int, timestamp: str=Clock.curr_time):
     """
     Create orders to target the desired number of shares holding in portfolio
 
@@ -123,25 +123,24 @@ def order_target(symbol:str, target_share:int, timestamp: str):
         if shares == 0:
             return
         elif shares > 0:
-            if (data.current(data, symbol=symbol, end=timestamp)[symbol].close * shares < Account.buying_power):  # this askprice will just be a close price for simplicity sake
-                print("Placing order to buy " + str(shares) + " shares of " + symbol)
+            if (float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) * shares < Account.buying_power):  # this askprice will just be a close price for simplicity sake
+                # print("Placing order to buy " + str(shares) + " shares of " + symbol)
                 return order(symbol, shares, "buy", timestamp)
             else:
-                print(
-                    "Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
+                # print("Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
                 return
         else:
-            print("Placing order to sell " + str(shares) + " shares of " + symbol)
+            # print("Placing order to sell " + str(shares) + " shares of " + symbol)
             return order(symbol, -shares, "sell", timestamp)
-    if (data.current(data, symbol=symbol, end=timestamp)[symbol].close * target_share < Account.buying_power):  # this askprice will just be a close price for simplicity sake
-        print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
+    if (float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) * target_share < Account.buying_power):  # this askprice will just be a close price for simplicity sake
+        # print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
         return order(symbol, target_share, "buy", timestamp)
     else:
-        print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
+        # print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
         return
 
 
-def order_target_value(symbol: str, target_value: float, timestamp: str):
+def order_target_value(symbol: str, target_value: float, timestamp: str=Clock.curr_time):
     """
     Create an order to specified asset to target specified amount of value
 
@@ -158,17 +157,17 @@ def order_target_value(symbol: str, target_value: float, timestamp: str):
         if currently not holding any share of "AAPL", method will attempt to buy 3 shares of "AAPL"
     """
     if (target_value <= 0):
-        print("Target_value must be > 0")
+        # print("Target_value must be > 0")
         return
     pos = Account.get_position(Account, symbol=symbol)
     if pos:
-        value = target_value - float(position.market_value)  ######################## this needs a rewrite
+        value = target_value - pos.market_value ######################## this needs a rewrite
         return order_value(symbol=symbol, value=value, timestamp=timestamp)
     else:
         return order_value(symbol=symbol, value=target_value, timestamp=timestamp)
 
 
-def order_target_percent(symbol: str, target_percent: float, timestamp: str):
+def order_target_percent(symbol: str, target_percent: float, timestamp: str=Clock.curr_time):
     """
     Create an order to specified asset to target amount based on the percent of the current portfolio
 
@@ -182,20 +181,20 @@ def order_target_percent(symbol: str, target_percent: float, timestamp: str):
         1 share of "AAPL" will be placed with the id returned
     """
     if (target_percent > 1):
-        print("Percentage larger than 100%, input smaller target_percent")
+        # print("Percentage larger than 100%, input smaller target_percent")
         return
     if (target_percent < 0):
-        print("Shorting is currently not supported")
+        # print("Shorting is currently not supported")
         target_percent == 0
     pos = Account.get_position(Account, symbol=symbol)
     if (target_percent == 0):
         if pos:
-            return Account.close_position(Account, symbol=symbol)
+            return Account.close_position(Account, symbol=symbol, timestamp=timestamp)
         else:
             return
     else:
         if pos:
-            percent = target_percent - (float(position.market_value) / Account.portfolio_value)  ######################## this needs a rewrite
+            percent = target_percent - (pos.market_value / Account.portfolio_value)  ######################## this needs a rewrite
             return order_percent(symbol=symbol, percent=percent, timestamp=timestamp)
         else:
             return order_percent(symbol=symbol, percent=target_percent, timestamp=timestamp)
