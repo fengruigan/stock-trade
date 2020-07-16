@@ -15,9 +15,10 @@ class Position:
     def set_qty(self, new_qty: int):
         self.qty = new_qty
 
-    def calc_market_value(self, timestamp: str):
+    def calc_market_value(self, timestamp: str=''):
         if (self.qty > 0):
-            price = float(Data.current(Data, self.symbol, timestamp)[self.symbol].close)
+            # price = float(Data.current(Data, self.symbol, timestamp)[self.symbol].close)
+            price = Data.curr_price[self.symbol]
             self.market_value = price * self.qty
         else:
             self.market_value = 0.0
@@ -44,6 +45,7 @@ class Account:
     def init_account(cls, capital: int=100000, leverage: int=1):
         cls.portfolio_value = capital
         cls.buying_power = capital * leverage
+        cls.portfolio_history.append(cls.portfolio_value)
 
     def calculate_portfolio(cls, timestamp: str):
         sum = cls.buying_power
@@ -57,23 +59,24 @@ class Account:
         if (side.__eq__('buy')):
             if pos:
                 pos.set_qty(new_qty= pos.qty + qty)
-                pos.calc_market_value(timestamp)
-                cls.buying_power = cls.buying_power - pos.market_value
-                return
             else:
                 cls.positions.append(Position(symbol, qty, timestamp))
-                cls.buying_power = cls.buying_power - qty * float(Data.current(Data, symbol, timestamp)[symbol].close)
-                return
+                # cls.buying_power = cls.buying_power - qty * float(Data.current(Data, symbol, timestamp)[symbol].close)
+            cls.buying_power = cls.buying_power - qty * Data.curr_price[symbol]
+            return
         else:
             if pos:
                 pos.set_qty(new_qty=pos.qty - qty)
                 if (pos.qty - qty <= 0):
-                    cls.positions.remove(pos)
-                return
-            else:
-                print("Position of " + symbol + " does not exist")
-                return
-        cls.calculate_portfolio(cls, timestamp)
+                    cls.close_position(cls, symbol, timestamp)
+                    return
+                else:
+                    cls.buying_power = cls.buying_power + qty * Data.curr_price[symbol]
+                    return
+            # else:
+            #     # print("Position of " + symbol + " does not exist")
+            #     return
+        # cls.calculate_portfolio(cls, timestamp)
 
     def list_positions(cls):
         return cls.positions

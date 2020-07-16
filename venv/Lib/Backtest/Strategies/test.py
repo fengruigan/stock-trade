@@ -47,9 +47,9 @@ def run_strategy(context, data):
     rebalance(context, data)
 
 def rebalance(context,data):
-    '''
+    """
         A function to rebalance - all execution logic goes here
-    '''
+    """
     for security in context.securities:
         order_target_percent(security, context.target_position[security], Clock.curr_time)
 

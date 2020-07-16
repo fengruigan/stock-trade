@@ -38,6 +38,7 @@ class Context:
 
 
 class Data:
+    curr_price = []
 
     def current(cls, symbol: str, end:str, timeframe: str='1Min'):
         """
@@ -106,6 +107,7 @@ class Clock:
             day = day + cls.day_delta
         cls.curr_time = cls.timeline[cls.time_idx]
         cls.is_running = True
+        Data.curr_price = dict((security, float(Data.current(Data,security, cls.curr_time)[security].close)) for security in Context.securities)
 
 
     def get_day_timeline(cls, day: str, minute_delta):
@@ -125,8 +127,10 @@ class Clock:
         cls.time_idx = cls.time_idx + 1
         if (cls.time_idx < len(cls.timeline)):
             cls.curr_time = cls.timeline[cls.time_idx]
-            # account.portfolio_history.append(account.portfolio_value)
+            account.portfolio_history.append(account.portfolio_value)
             # account.benchmark.append(account.benchmark_value)
+            for security in Context.securities:
+                Data.curr_price[security] = float(Data.current(Data,security, cls.curr_time)[security].close)
             print(cls.curr_time)
         else:
             cls.is_running = False

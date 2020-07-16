@@ -40,7 +40,8 @@ def order_value(symbol: str, value: float, timestamp: str=Clock.curr_time):
         return
     elif (value > 0):
         if (Account.buying_power > value):
-            askprice = float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close)  # this askprice will just be a close price for simplicity sake
+            # askprice = float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close)  # this askprice will just be a close price for simplicity sake
+            askprice = Data.curr_price[symbol]
             if (askprice != 0):
                 shares = int(value / askprice)
                 if (shares <= 0):
@@ -61,7 +62,8 @@ def order_value(symbol: str, value: float, timestamp: str=Clock.curr_time):
             if (value >= pos.market_value): ######################## this needs a rewrite
                 return Account.close_position(Account, symbol, timestamp)
             else:
-                bidprice = float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) # this bidprice will just be a close price for simplicity sake
+                # bidprice = float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) # this bidprice will just be a close price for simplicity sake
+                bidprice = Data.curr_price[symbol]
                 if (bidprice != 0):
                     shares = int(value / bidprice)
                     if (shares == 0):
@@ -123,7 +125,8 @@ def order_target(symbol:str, target_share:int, timestamp: str=Clock.curr_time):
         if shares == 0:
             return
         elif shares > 0:
-            if (float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) * shares < Account.buying_power):  # this askprice will just be a close price for simplicity sake
+            # if (float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) * shares < Account.buying_power):  # this askprice will just be a close price for simplicity sake
+            if (Data.curr_price[symbol] * shares < Account.buying_power):
                 # print("Placing order to buy " + str(shares) + " shares of " + symbol)
                 return order(symbol, shares, "buy", timestamp)
             else:
@@ -132,7 +135,8 @@ def order_target(symbol:str, target_share:int, timestamp: str=Clock.curr_time):
         else:
             # print("Placing order to sell " + str(shares) + " shares of " + symbol)
             return order(symbol, -shares, "sell", timestamp)
-    if (float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) * target_share < Account.buying_power):  # this askprice will just be a close price for simplicity sake
+    # if (float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) * target_share < Account.buying_power):  # this askprice will just be a close price for simplicity sake
+    if (Data.curr_price[symbol] * shares < Account.buying_power):
         # print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
         return order(symbol, target_share, "buy", timestamp)
     else:
