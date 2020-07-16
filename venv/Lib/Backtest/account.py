@@ -25,14 +25,15 @@ class Account:
     leverage = 1
     buying_power = 0.0
 
-    def set_capital(cls, qty: int=100000, leverage: int=1):
-        cls.portfolio_value = qty
-        cls.buying_power = qty * leverage
+    def init_account(cls, capital: int=100000, leverage: int=1):
+        cls.portfolio_value = capital
+        cls.buying_power = capital * leverage
 
     def calculate_portfolio(cls, timestamp: str):
+        print("calculate portfolio")
         pass
 
-    def submit_order(cls, symbol: str, qty: int, side: str, type: str='market', time_in_force: str='gtc'):
+    def submit_order(cls, symbol: str, qty: int, side: str, timestamp: str, type: str='market', time_in_force: str='gtc'):
         pos = cls.get_position(cls, symbol=symbol)
         if (side.__eq__('buy')):
             if pos:
@@ -50,6 +51,7 @@ class Account:
             else:
                 print("Position of " + symbol + " does not exist")
                 return
+        # cls.calculate_portfolio(cls, timestamp)
 
     def list_positions(cls):
         return cls.positions
@@ -62,11 +64,11 @@ class Account:
         :return:
         """
         pos = cls.get_position(cls, symbol=symbol)
-        if pos is None:
-            print("Position not found")
-        else:
+        if pos:
             # calculate portfolio
             cls.positions.remove(pos)
+        else:
+            print("Position not found")
 
     def close_all_positions(cls):
         """

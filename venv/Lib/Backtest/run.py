@@ -68,25 +68,45 @@ class data:
         return API.api.get_barset(symbols=symbol, timeframe=timeframe, limit=lookback, end=end).df
 
 class Clock:
+    """
+    This clock will be create the time line for backtest
+    """
     time_zone = 'America/New_York'
     start = "2017-01-01T00:00:00-05:00"
     end = "2018-01-01T00:00:00-05:00"
-    day_progression = pd.to_timedelta("1 day")
-    day_timestamp = []
+    timeframe = "minute"
+    day_delta = pd.to_timedelta("1 day")
+    timeline = [] ##### make this a fixed list of timestamp with 1 min delta
     curr_time = None
 
     def init_clock(cls, start: str, end: str, timeframe: str="minute"):
         """
-        initialize clock for backtest
+        initialize clock for backtest, generate the timeline for later use
 
         :param start: isoformat pd.timestamp
         :param end: isoformat pd.timestamp
         :param timeframe: minute or day, determines the frequency of data acquisition
         :return:
         """
-        cls.start = pd.Timestamp(start, tz=time_zone)
-        cls.end = pd.Timestamp(end, tz=time_zone)
+        cls.start = pd.Timestamp(start, tz=cls.time_zone)
+        cls.end = pd.Timestamp(end, tz=cls.time_zone)
+        cls.timeframe = timeframe
+        day = pd.Timestamp(start)
+        end = pd.Timestamp(end)
+        while (day != end):
+            if (day.dayofweek != 6 and day.dayofweek != 7):  ## skip weekends not skipping holidays
+                cls.get_day_timeline(Clock, day)
+            day = day + cls.day_delta
 
-    def get_time(self):
+
+    def get_day_timeline(cls, day: str):
+        start = day + pd.to_timedelta("9 hour 30 minute")
+        minute_delta = pd.to_timedelta("1 minute")
+        while (start <= (day + pd.to_timedelta("16 hour"))):
+            cls.timeline.append(start.isoformat())
+            start = start + minute_delta
+
+
+    def get_time(cls):
         pass
 
