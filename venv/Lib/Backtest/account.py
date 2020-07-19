@@ -15,7 +15,7 @@ class Position:
     def set_qty(self, new_qty: int):
         self.qty = new_qty
 
-    def calc_market_value(self, timestamp: str=''):
+    def calc_market_value(self, timestamp: str):
         if (self.qty > 0):
             # price = float(Data.current(Data, self.symbol, timestamp)[self.symbol].close)
             price = Data.curr_price[self.symbol]
@@ -45,7 +45,7 @@ class Account:
     def init_account(cls, capital: int=100000, leverage: int=1):
         cls.portfolio_value = capital
         cls.buying_power = capital * leverage
-        cls.portfolio_history.append(cls.portfolio_value)
+        # cls.portfolio_history.append(cls.portfolio_value)
 
     def calculate_portfolio(cls, timestamp: str):
         sum = cls.buying_power

@@ -33,12 +33,21 @@ System classes
 """
 
 class Context:
+    securities = []
+    params = {'trade_freq': 5}
+
     def __init__(cls):
         pass
 
 
 class Data:
-    curr_price = []
+    curr_price = None
+    data = None
+
+    # def init_data(cls, start: str, timeframe):
+    #     date = start - pd.to_timedelta('1 day')
+    #     for security in Context.securities:
+    #         cls.data[security] = API.api.polygon.historic_agg_v2(symbol=security, multiplier=1, timespan=timeframe, limit=Context.params['indicator_lookback'])
 
     def current(cls, symbol: str, end:str, timeframe: str='1Min'):
         """
@@ -50,10 +59,13 @@ class Data:
                is an alias of 1Min. Similarly, day is of 1D.
         :return: pd.Series of length 1
         """
-        return API.api.get_barset(symbols=symbol, timeframe=timeframe, limit=1, end=end).df
+        if (not cls.data[symbol].truncate(after=Clock.curr_time).tail(1).empty):
+            return cls.data[symbol].truncate(after=Clock.curr_time).tail(1)
+        else:
+            return pd.DataFrame()
 
 
-    def history(cls, symbol: str, end:str, lookback: int=253, timeframe: str='1Min'):
+    def history(cls, symbol: str, curr_time: int, lookback: int=253, timeframe: str='1Min'):
         """
         Get lookback number of barsets of historical data up to the end date
 
@@ -62,13 +74,18 @@ class Data:
         :param lookback: number of bars to get, from 1 to 1000
         :param timeframe: One of minute, 1Min, 5Min, 15Min, day or 1D. minute
                is an alias of 1Min. Similarly, day is of 1D.
-        :return: pd.Series of length lookback
+        :return: pd.DataFrame of length lookback
 
         note: this is a modified version of the get_barset() in alpaca API.
               get_barset() allows for multiple symbols input, but it produces NaN data when the timestamps misalign
               so here I decided to make things less prone to error by taking symbol data one by one
         """
-        return API.api.get_barset(symbols=symbol, timeframe=timeframe, limit=lookback, end=end).df
+        # return API.api.get_barset(symbols=symbol, timeframe=timeframe, limit=lookback, end=end).df
+        if (not cls.data[symbol].truncate(after=Clock.curr_time).tail(lookback).empty):
+            return cls.data[symbol].truncate(after=Clock.curr_time).tail(lookback)
+        else:
+            return pd.DataFrame()
+
 
 class Clock:
     """
@@ -81,11 +98,13 @@ class Clock:
     day_delta = pd.to_timedelta('1 day')
     minute_delta = pd.to_timedelta('1 minute')
     timeline = [] ##### make this a fixed list of timestamp with 1 min delta
+    dateline = []
     curr_time = None
+    curr_day = None
     time_idx = 0
     is_running = False
 
-    def init_clock(cls, start: str, end: str, minute_delta: str='1 minute', timeframe: str='minute'):
+    def init_clock(cls, context, start: str, end: str, minute_delta: str='1 minute', timeframe: str='minute'):
         """
         initialize clock for backtest, generate the timeline for later use
 
@@ -97,41 +116,67 @@ class Clock:
         """
         cls.start = pd.Timestamp(start, tz=cls.time_zone)
         cls.end = pd.Timestamp(end, tz=cls.time_zone)
+        cls.curr_day = cls.start
         cls.timeframe = timeframe
         cls.minute_delta = pd.to_timedelta(minute_delta)
         day = cls.start
-        end = cls.end
-        while (day != end):
-            if (day.dayofweek != 6 and day.dayofweek != 7):  ## skip weekends not skipping holidays
-                cls.get_day_timeline(Clock, day, cls.minute_delta)
+        frames = dict((security, []) for security in context.securities)
+        Data.data = dict((security, None) for security in context.securities)
+        Data.curr_price = dict((security, 0.0) for security in Context.securities)
+        while (day <= cls.end):
+            if (day.dayofweek == 5 or day.dayofweek == 6):
+                day = day + cls.day_delta
+                continue
+            cls.dateline.append(day)
+            cls.set_data_timeline(cls, context, day, frames)
             day = day + cls.day_delta
+        for security in context.securities:
+            Data.data[security] = pd.concat(frames[security])
         cls.curr_time = cls.timeline[cls.time_idx]
         cls.is_running = True
-        Data.curr_price = dict((security, float(Data.current(Data,security, cls.curr_time)[security].close)) for security in Context.securities)
+        # Data.curr_price = dict((security, float(Data.current(Data,security, cls.curr_time)[security].close)) for security in Context.securities)
+        print('Initialize complete')
+        # for security in context.securities:
+        #     print(security + ' has ' + str(len(Data.data[security])) + ' data points')
 
 
-    def get_day_timeline(cls, day: str, minute_delta):
+    def set_data_timeline(cls, context, day: str, frames):
         """
         append a list of minute timestamps to the class timeline
         :param day: current day
         :param minute_delta: difference between two timestamps
         :return:
         """
-        start = day + pd.to_timedelta("9 hour 30 minute")  ## set start of day to 9:30 am
-        while (start <= (day + pd.to_timedelta("16 hour"))):  ## set end of day to 4:00 pm
-            cls.timeline.append(start.isoformat())
-            start = start + minute_delta
+        start = day + pd.to_timedelta('9 hour 30 minute') ## skip to market open
+        while (start != day + pd.to_timedelta('16 hour')):
+            cls.timeline.append(start)
+            start = start + pd.to_timedelta(cls.minute_delta)
+        day = day.isoformat()
+        # print("appending data for day: " + day)
+        for security in context.securities:
+            frames[security].append(API.api.polygon.historic_agg_v2(symbol=security, multiplier=1, timespan=cls.timeframe,
+                                                                    _from=day, to=day).df)
 
 
     def pass_time(cls, account):
         cls.time_idx = cls.time_idx + 1
         if (cls.time_idx < len(cls.timeline)):
+            # print(cls.curr_time)
             cls.curr_time = cls.timeline[cls.time_idx]
-            account.portfolio_history.append(account.portfolio_value)
-            # account.benchmark.append(account.benchmark_value)
             for security in Context.securities:
-                Data.curr_price[security] = float(Data.current(Data,security, cls.curr_time)[security].close)
-            print(cls.curr_time)
+                if (len(Data.current(Data, security, cls.curr_time)) != 0):
+                    Data.curr_price[security] = float(Data.current(Data, symbol=security, end=cls.curr_time).close)
+                    # print(Data.curr_price[security])
+                else:
+                    Data.curr_price[security] = 0
+            if (cls.curr_time.day != cls.curr_day):
+                account.portfolio_history.append(account.portfolio_value)
+                # print('completed run for ' + cls.curr_day.isoformat())
+                cls.curr_day = cls.curr_time.day
+                print(cls.curr_time.date())
+            # account.benchmark.append(account.benchmark_value)
         else:
+            # cls.dateline.append(end)
+            # account.portfolio_history.append(account.portfolio_value)
             cls.is_running = False
 
