@@ -81,14 +81,14 @@ def generate_signals(context, data):
 
     for security in context.securities:
         try:
-            px = data.history(data, security, Clock.curr_time, context.params['indicator_lookback'], context.params['indicator_freq'])
+            price_data = data.history(data, security, Clock.curr_time, context.params['indicator_lookback'], context.params['indicator_freq'])
         except:
             print("error here!!!!!!!")
             return
         # px = price_data[security]
         if (len(px) < context.params['indicator_lookback']):
             return
-        context.signals[security] = signal_function(px, context.params, context.signals[security])
+        context.signals[security] = signal_function(price_data, context.params, context.signals[security])
         # print(security + " has signal " + str(context.signals[security]))
 
 def signal_function(px, params, last_signal):
