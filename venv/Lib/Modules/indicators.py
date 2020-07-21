@@ -9,7 +9,6 @@ There are a lot more indicators to import,
 import more when needed
 """
 import pandas as pd
-import alpaca_trade_api as tradeapi
 import ta.trend
 import ta.volatility
 import bisect

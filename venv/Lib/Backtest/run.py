@@ -42,6 +42,7 @@ class Context:
 
 class Data:
     curr_price = None
+    curr_frame = dict((security, pd.DataFrame()) for security in Context.securities)
     data = None
 
     # def init_data(cls, start: str, timeframe):
@@ -49,7 +50,7 @@ class Data:
     #     for security in Context.securities:
     #         cls.data[security] = API.api.polygon.historic_agg_v2(symbol=security, multiplier=1, timespan=timeframe, limit=Context.params['indicator_lookback'])
 
-    def current(cls, symbol: str, end:str, timeframe: str='1Min'):
+    def current(cls, symbol: str, curr_time:str, timeframe: str='1Min'):
         """
         Get the current barset at end date
 
@@ -59,13 +60,13 @@ class Data:
                is an alias of 1Min. Similarly, day is of 1D.
         :return: pd.Series of length 1
         """
-        if (not cls.data[symbol].truncate(after=Clock.curr_time).tail(1).empty):
-            return cls.data[symbol].truncate(after=Clock.curr_time).tail(1)
+        if (not cls.data[symbol].truncate(after=curr_time).tail(1).empty):
+            return cls.data[symbol].truncate(after=curr_time).tail(1)
         else:
             return pd.DataFrame()
 
 
-    def history(cls, symbol: str, curr_time: int, lookback: int=253, timeframe: str='1Min'):
+    def history(cls, symbol: str, curr_time: str, lookback: int=253, timeframe: str='1Min'):
         """
         Get lookback number of barsets of historical data up to the end date
 
@@ -81,8 +82,8 @@ class Data:
               so here I decided to make things less prone to error by taking symbol data one by one
         """
         # return API.api.get_barset(symbols=symbol, timeframe=timeframe, limit=lookback, end=end).df
-        if (not cls.data[symbol].truncate(after=Clock.curr_time).tail(lookback).empty):
-            return cls.data[symbol].truncate(after=Clock.curr_time).tail(lookback)
+        if (not cls.data[symbol].truncate(after=curr_time).tail(lookback).empty):
+            return cls.data[symbol].truncate(after=curr_time).tail(lookback)
         else:
             return pd.DataFrame()
 
@@ -119,6 +120,10 @@ class Clock:
         cls.curr_day = cls.start
         cls.timeframe = timeframe
         cls.minute_delta = pd.to_timedelta(minute_delta)
+
+        cls.is_running = True
+
+        ## handle Data initialization
         day = cls.start
         frames = dict((security, []) for security in context.securities)
         Data.data = dict((security, None) for security in context.securities)
@@ -130,10 +135,12 @@ class Clock:
             cls.dateline.append(day)
             cls.set_data_timeline(cls, context, day, frames)
             day = day + cls.day_delta
+
+        cls.curr_time = cls.timeline[cls.time_idx]
         for security in context.securities:
             Data.data[security] = pd.concat(frames[security])
-        cls.curr_time = cls.timeline[cls.time_idx]
-        cls.is_running = True
+            # Data.curr_frame[security] = Data.history(Data, security, cls.curr_time, Context.params['indicator_lookback'], cls.timeframe)
+
         # Data.curr_price = dict((security, float(Data.current(Data,security, cls.curr_time)[security].close)) for security in Context.securities)
         print('Initialize complete')
         # for security in context.securities:
@@ -164,11 +171,21 @@ class Clock:
             # print(cls.curr_time)
             cls.curr_time = cls.timeline[cls.time_idx]
             for security in Context.securities:
+                # try:
+                #     Data.curr_frame[security] = pd.concat([Data.curr_frame[security], Data.data[security].loc[str(Data.curr_frame[security].iloc[len(Data.curr_frame[security]) - 1].name) : str(cls.curr_time)].tail(-1)]).tail(Context.params['indicator_lookback'])
+                # except:
+                #     Data.curr_frame[security] = Data.history(Data, security, cls.curr_time, Context.params['indicator_lookback'], cls.timeframe)
+                # try:
+                #     Data.curr_price[security] = float(Data.curr_frame[security].tail(1).close)
+                # except:
+                #     Data.curr_price[security] = 0
                 if (len(Data.current(Data, security, cls.curr_time)) != 0):
-                    Data.curr_price[security] = float(Data.current(Data, symbol=security, end=cls.curr_time).close)
+                    Data.curr_price[security] = float(Data.current(Data, symbol=security, curr_time=cls.curr_time).close)
                     # print(Data.curr_price[security])
                 else:
+                    print("error in Data.current")
                     Data.curr_price[security] = 0
+
             if (cls.curr_time.day != cls.curr_day):
                 account.portfolio_history.append(account.portfolio_value)
                 # print('completed run for ' + cls.curr_day.isoformat())
@@ -176,7 +193,5 @@ class Clock:
                 print(cls.curr_time.date())
             # account.benchmark.append(account.benchmark_value)
         else:
-            # cls.dateline.append(end)
-            # account.portfolio_history.append(account.portfolio_value)
             cls.is_running = False
 

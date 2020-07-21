@@ -34,6 +34,7 @@ def handle_data(context, data):
         A function to define things to do at every bar
     """
     # time to trade, call the strategy function
+
     run_strategy(context, data)
     Clock.pass_time(Clock, Account)
 
@@ -82,11 +83,12 @@ def generate_signals(context, data):
     for security in context.securities:
         try:
             price_data = data.history(data, security, Clock.curr_time, context.params['indicator_lookback'], context.params['indicator_freq'])
+            # price_data = data.curr_frame[security]
         except:
             print("error here!!!!!!!")
             return
         # px = price_data[security]
-        if (len(px) < context.params['indicator_lookback']):
+        if (len(price_data) < context.params['indicator_lookback']):
             return
         context.signals[security] = signal_function(price_data, context.params, context.signals[security])
         # print(security + " has signal " + str(context.signals[security]))
