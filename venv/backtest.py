@@ -6,14 +6,14 @@ from Lib.Backtest.account import Account
 import matplotlib.pyplot as plt
 import pandas as pd
 import time
-from Lib.Backtest.Strategies.test import initialize, handle_data
-import numpy as np
+from Lib.Backtest.Strategies.strategy_1 import initialize, handle_data
+
 
 ## parameters to change
-alpaca_key = ''
-alpaca_secret_key = ''
-start_date = '2019-03-05'
-end_date = '2019-03-13'
+alpaca_key = 'PKFE10XOBD7S4S5PYW4S'
+alpaca_secret_key = 'OQaJy/hcLjrNSNubTbUTpqbH21ybe/Dow65YYBfu'
+start_date = '2019-01-01'
+end_date = '2020-01-01'
 capital = 100000
 
 

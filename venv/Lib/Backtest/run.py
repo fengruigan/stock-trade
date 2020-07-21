@@ -139,12 +139,12 @@ class Clock:
         cls.curr_time = cls.timeline[cls.time_idx]
         for security in context.securities:
             Data.data[security] = pd.concat(frames[security])
-            # Data.curr_frame[security] = Data.history(Data, security, cls.curr_time, Context.params['indicator_lookback'], cls.timeframe)
+            Data.curr_frame[security] = Data.history(Data, security, cls.curr_time, Context.params['indicator_lookback'], cls.timeframe)
+            print(security + ' has ' + str(len(Data.data[security])) + ' data points')
 
         # Data.curr_price = dict((security, float(Data.current(Data,security, cls.curr_time)[security].close)) for security in Context.securities)
         print('Initialize complete')
-        # for security in context.securities:
-        #     print(security + ' has ' + str(len(Data.data[security])) + ' data points')
+
 
 
     def set_data_timeline(cls, context, day: str, frames):
@@ -159,7 +159,6 @@ class Clock:
             cls.timeline.append(start)
             start = start + pd.to_timedelta(cls.minute_delta)
         day = day.isoformat()
-        # print("appending data for day: " + day)
         for security in context.securities:
             frames[security].append(API.api.polygon.historic_agg_v2(symbol=security, multiplier=1, timespan=cls.timeframe,
                                                                     _from=day, to=day).df)
@@ -171,20 +170,18 @@ class Clock:
             # print(cls.curr_time)
             cls.curr_time = cls.timeline[cls.time_idx]
             for security in Context.securities:
-                # try:
-                #     Data.curr_frame[security] = pd.concat([Data.curr_frame[security], Data.data[security].loc[str(Data.curr_frame[security].iloc[len(Data.curr_frame[security]) - 1].name) : str(cls.curr_time)].tail(-1)]).tail(Context.params['indicator_lookback'])
-                # except:
-                #     Data.curr_frame[security] = Data.history(Data, security, cls.curr_time, Context.params['indicator_lookback'], cls.timeframe)
-                # try:
-                #     Data.curr_price[security] = float(Data.curr_frame[security].tail(1).close)
-                # except:
-                #     Data.curr_price[security] = 0
-                if (len(Data.current(Data, security, cls.curr_time)) != 0):
-                    Data.curr_price[security] = float(Data.current(Data, symbol=security, curr_time=cls.curr_time).close)
-                    # print(Data.curr_price[security])
-                else:
-                    print("error in Data.current")
+                try:
+                    Data.curr_frame[security] = pd.concat([Data.curr_frame[security], Data.data[security].loc[str(Data.curr_frame[security].iloc[len(Data.curr_frame[security]) - 1].name) : str(cls.curr_time)].tail(-1)]).tail(Context.params['indicator_lookback'])
+                except:
+                    Data.curr_frame[security] = Data.history(Data, security, cls.curr_time, Context.params['indicator_lookback'], cls.timeframe)
+                try:
+                    Data.curr_price[security] = float(Data.curr_frame[security].tail(1).close)
+                except:
                     Data.curr_price[security] = 0
+                # if (len(Data.current(Data, security, cls.curr_time)) != 0):
+                #     Data.curr_price[security] = float(Data.current(Data, symbol=security, curr_time=cls.curr_time).close)
+                # else:
+                #     Data.curr_price[security] = 0
 
             if (cls.curr_time.day != cls.curr_day):
                 account.portfolio_history.append(account.portfolio_value)

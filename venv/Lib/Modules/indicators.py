@@ -130,7 +130,7 @@ def fibonacci_support(px):
     return lower_dist, upper_dist
 
 
-def bollinger_band(volume, period=20, fillna=False):
+def bollinger_band(close, period=20, fillna=False):
     """
     Bollinger Band
 
@@ -187,7 +187,7 @@ def bollinger_band(volume, period=20, fillna=False):
         indicator = ta.volatility.BollingerBands(close=close, n=n, ndev=ndev, fillna=fillna)
         return indicator.bollinger_lband()
 
-    upper = bollinger_hband(close=volume, n=period, fillna=fillna)
-    mid = bollinger_mavg(close=volume, n=period, fillna=fillna)
-    lower = bollinger_lband(close=volume, n=period, fillna=fillna)
+    upper = bollinger_hband(close=close, n=period, fillna=fillna)
+    mid = bollinger_mavg(close=close, n=period, fillna=fillna)
+    lower = bollinger_lband(close=close, n=period, fillna=fillna)
     return upper[-1], mid[-1], lower[-1]
