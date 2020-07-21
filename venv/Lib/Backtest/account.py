@@ -43,6 +43,7 @@ class Account:
         return cls.portfolio_value, cls.buying_power
 
     def init_account(cls, capital: int=100000, leverage: int=1):
+        cls.portfolio_history = []
         cls.portfolio_value = capital
         cls.buying_power = capital * leverage
         # cls.portfolio_history.append(cls.portfolio_value)

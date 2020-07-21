@@ -120,7 +120,9 @@ class Clock:
         cls.curr_day = cls.start
         cls.timeframe = timeframe
         cls.minute_delta = pd.to_timedelta(minute_delta)
-
+        cls.timeline = []
+        cls.dateline = []
+        cls.time_idx = 0
         cls.is_running = True
 
         ## handle Data initialization
@@ -184,6 +186,7 @@ class Clock:
                 #     Data.curr_price[security] = 0
 
             if (cls.curr_time.day != cls.curr_day):
+                account.calculate_portfolio(account, cls.curr_time)
                 account.portfolio_history.append(account.portfolio_value)
                 # print('completed run for ' + cls.curr_day.isoformat())
                 cls.curr_day = cls.curr_time.day
