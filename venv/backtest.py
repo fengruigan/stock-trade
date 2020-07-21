@@ -10,8 +10,8 @@ from Lib.Backtest.Strategies.test import initialize, handle_data
 import numpy as np
 
 ## parameters to change
-alpaca_key = 'PKFE10XOBD7S4S5PYW4S'
-alpaca_secret_key = 'OQaJy/hcLjrNSNubTbUTpqbH21ybe/Dow65YYBfu'
+alpaca_key = ''
+alpaca_secret_key = ''
 start_date = '2019-03-05'
 end_date = '2019-03-13'
 capital = 100000

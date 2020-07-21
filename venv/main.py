@@ -12,7 +12,7 @@ from Lib.Modules.indicators import bollinger_band, ema
 from Lib.Strategies.bollinger import initialize, handle_data
 
 # use this method to update user API keys
-keys.set_keys(keys, 'PKGNT09BXAL6WN6GA0KX', 'zd5goUdqHV6gMdi7GVb0j0167bLxxY2VchVMu3Hp')
+keys.set_keys(keys, '', '')
 API.init_api(API)
 
 # # running strategy
