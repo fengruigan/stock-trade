@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import time
 from Lib.Backtest.Strategies.strategy_1 import initialize, handle_data
+from tqdm import tqdm
 
 
 ## parameters to change
@@ -28,12 +29,11 @@ t0 = time.time()
 Clock.init_clock(Clock, Context, start=start, end=end, minute_delta=minute_delta)
 print("Data collection time: " + str(time.time() - t0) + " seconds")
 Account.init_account(Account, capital=capital)
-t0 = time.time()
-while (Clock.is_running):
-    handle_data(Context, Data)
 
-t1 = time.time() - t0
-print("runtime is " + str(t1))
+# while (Clock.is_running):
+#     handle_data(Context, Data)
+for t in tqdm(Clock.timeline):
+    handle_data(Context, Data)
 
 print(Account.get_account(Account))
 plt.plot(Clock.dateline, Account.portfolio_history)

@@ -187,7 +187,7 @@ class Clock:
                 account.portfolio_history.append(account.portfolio_value)
                 # print('completed run for ' + cls.curr_day.isoformat())
                 cls.curr_day = cls.curr_time.day
-                print(cls.curr_time.date())
+                # print(cls.curr_time.date())
             # account.benchmark.append(account.benchmark_value)
         else:
             cls.is_running = False
