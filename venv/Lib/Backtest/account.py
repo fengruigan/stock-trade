@@ -1,7 +1,7 @@
 """
 Holds the account info for backtests and handle order submission
 """
-from Lib.Backtest.run import Data
+from Lib.Backtest.run import Data, Clock
 
 
 class Position:
@@ -35,9 +35,9 @@ class Account:
     portfolio_value = 0.0
     leverage = 1
     buying_power = 0.0
-    benchmark_value = 0.0
     portfolio_history = []
     benchmark = []
+
 
     def get_account(cls):
         return cls.portfolio_value, cls.buying_power
@@ -46,7 +46,14 @@ class Account:
         cls.portfolio_history = []
         cls.portfolio_value = capital
         cls.buying_power = capital * leverage
+
+        # setup benchmark
+        bench = Data.set_benchmark(Data, start=Clock.start.isoformat(), end=Clock.end.isoformat())
+        bench_mult = int(cls.portfolio_value / bench[0])
+        cls.benchmark = bench * bench_mult
+
         # cls.portfolio_history.append(cls.portfolio_value)
+
 
     def calculate_portfolio(cls, timestamp: str):
         sum = cls.buying_power
@@ -62,7 +69,6 @@ class Account:
                 pos.set_qty(new_qty= pos.qty + qty)
             else:
                 cls.positions.append(Position(symbol, qty, timestamp))
-                # cls.buying_power = cls.buying_power - qty * float(Data.current(Data, symbol, timestamp)[symbol].close)
             cls.buying_power = cls.buying_power - qty * Data.curr_price[symbol]
             return
         else:
@@ -74,10 +80,7 @@ class Account:
                 else:
                     cls.buying_power = cls.buying_power + qty * Data.curr_price[symbol]
                     return
-            # else:
-            #     # print("Position of " + symbol + " does not exist")
-            #     return
-        # cls.calculate_portfolio(cls, timestamp)
+
 
     def list_positions(cls):
         return cls.positions
@@ -120,6 +123,4 @@ class Account:
         for pos in cls.positions:
             if (symbol.__eq__(pos.symbol)):
                 return pos
-        # print("Position of " + symbol + " does not exist")
         return None
-

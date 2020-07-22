@@ -88,6 +88,17 @@ class Data:
             return pd.DataFrame()
 
 
+    def set_benchmark(cls, start: str, end: str):
+        """
+        return SPY500 day data as bench mark
+
+        :param start: date in isoformat
+        :param end: date in isoformat
+        :return: pd.DataFrame of close prices of SPY
+        """
+        return API.api.polygon.historic_agg_v2('SPY', 1, 'day', _from=start, to=end).df.close
+
+
 class Clock:
     """
     This clock will be create the time line for backtest
@@ -125,11 +136,13 @@ class Clock:
         cls.time_idx = 0
         cls.is_running = True
 
-        ## handle Data initialization
+        # data params initialization
         day = cls.start
         frames = dict((security, []) for security in context.securities)
         Data.data = dict((security, None) for security in context.securities)
         Data.curr_price = dict((security, 0.0) for security in Context.securities)
+
+        # initialize timeline
         while (day <= cls.end):
             if (day.dayofweek == 5 or day.dayofweek == 6):
                 day = day + cls.day_delta
@@ -137,30 +150,39 @@ class Clock:
             cls.dateline.append(day)
             cls.set_data_timeline(cls, context, day, frames)
             day = day + cls.day_delta
-
         cls.curr_time = cls.timeline[cls.time_idx]
+
+        # construct the entire DataFrame
         for security in context.securities:
             Data.data[security] = pd.concat(frames[security])
             Data.curr_frame[security] = Data.history(Data, security, cls.curr_time, Context.params['indicator_lookback'], cls.timeframe)
             print(security + ' has ' + str(len(Data.data[security])) + ' data points')
 
-        # Data.curr_price = dict((security, float(Data.current(Data,security, cls.curr_time)[security].close)) for security in Context.securities)
+        # set bencmark
+        # Data.benchmark_multiplier = int(Account.portfolio_value / Data.benchmark[0])
+        # Data.set_benchmark(Data, cls.start.isoformat(), cls.end.isoformat())
+
         print('Initialize complete')
 
 
 
     def set_data_timeline(cls, context, day: str, frames):
         """
-        append a list of minute timestamps to the class timeline
+        append a list of minute timestamps to the class timeline and append a day DataFrame to frames
+        :param context: the initialized Context
         :param day: current day
-        :param minute_delta: difference between two timestamps
+        :param frames: the frames contains all
         :return:
         """
         start = day + pd.to_timedelta('9 hour 30 minute') ## skip to market open
+
+        # initialize day timeline
         while (start != day + pd.to_timedelta('16 hour')):
             cls.timeline.append(start)
             start = start + pd.to_timedelta(cls.minute_delta)
         day = day.isoformat()
+
+        # load day data
         for security in context.securities:
             frames[security].append(API.api.polygon.historic_agg_v2(symbol=security, multiplier=1, timespan=cls.timeframe,
                                                                     _from=day, to=day).df)
@@ -180,17 +202,11 @@ class Clock:
                     Data.curr_price[security] = float(Data.curr_frame[security].tail(1).close)
                 except:
                     Data.curr_price[security] = 0
-                # if (len(Data.current(Data, security, cls.curr_time)) != 0):
-                #     Data.curr_price[security] = float(Data.current(Data, symbol=security, curr_time=cls.curr_time).close)
-                # else:
-                #     Data.curr_price[security] = 0
 
             if (cls.curr_time.day != cls.curr_day):
                 account.calculate_portfolio(account, cls.curr_time)
                 account.portfolio_history.append(account.portfolio_value)
-                # print('completed run for ' + cls.curr_day.isoformat())
                 cls.curr_day = cls.curr_time.day
-                # print(cls.curr_time.date())
             # account.benchmark.append(account.benchmark_value)
         else:
             cls.is_running = False
