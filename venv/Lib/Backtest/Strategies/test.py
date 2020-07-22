@@ -13,7 +13,7 @@ def initialize(context):
         A function to define things to do at the start of the strategy
     """
     # universe selection
-    context.securities = ['AMZN', 'AAPL']
+    context.securities = ['AAPL']
 
     # define strategy parameters
     context.params = {'indicator_lookback':375,
@@ -82,8 +82,8 @@ def generate_signals(context, data):
 
     for security in context.securities:
         try:
-            price_data = data.history(data, security, Clock.curr_time, context.params['indicator_lookback'], context.params['indicator_freq'])
-            # price_data = data.curr_frame[security]
+            # price_data = data.history(data, security, Clock.curr_time, context.params['indicator_lookback'], context.params['indicator_freq'])
+            price_data = data.curr_frame[security]
         except:
             print("error here!!!!!!!")
             return

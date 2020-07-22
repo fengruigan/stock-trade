@@ -6,7 +6,7 @@ from Lib.Backtest.account import Account
 import matplotlib.pyplot as plt
 import pandas as pd
 import time
-from Lib.Backtest.Strategies.strategy_1 import initialize, handle_data
+from Lib.Backtest.Strategies.test import initialize, handle_data
 from tqdm import tqdm
 
 
@@ -35,6 +35,6 @@ Account.init_account(Account, capital=capital)
 for t in tqdm(Clock.timeline):
     handle_data(Context, Data)
 
-print(Account.get_account(Account))
+print("Total return: " + str((Account.portfolio_value - capital) / capital))
 plt.plot(Clock.dateline, Account.portfolio_history)
 plt.show()

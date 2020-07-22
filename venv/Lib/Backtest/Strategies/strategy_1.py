@@ -107,10 +107,8 @@ def signal_function(px, vx, params):
     dist_to_upper = 100 * (upper - last_vx) / (upper - lower)
 
     if dist_to_upper > 90 and ind2 - ind3 > 0:
-        print('buying')
         return 1
     elif ind2 - ind3 < 0 and dist_to_upper > 65:
-        # print('selling')
         return -1
     else:
         return 0

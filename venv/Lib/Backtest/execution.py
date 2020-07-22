@@ -39,7 +39,7 @@ def order_value(symbol: str, value: float, timestamp: str=Clock.curr_time):
         # print("Order value cannot be 0")
         return
     elif (value > 0):
-        if (Account.buying_power > value):
+        if (Account.buying_power >= value):
             # askprice = float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close)  # this askprice will just be a close price for simplicity sake
             askprice = Data.curr_price[symbol]
             if (askprice != 0):
@@ -136,7 +136,7 @@ def order_target(symbol:str, target_share:int, timestamp: str=Clock.curr_time):
             # print("Placing order to sell " + str(shares) + " shares of " + symbol)
             return order(symbol, -shares, "sell", timestamp)
     # if (float(Data.current(Data, symbol=symbol, end=timestamp)[symbol].close) * target_share < Account.buying_power):  # this askprice will just be a close price for simplicity sake
-    if (Data.curr_price[symbol] * shares < Account.buying_power):
+    if (Data.curr_price[symbol] * shares <= Account.buying_power):
         # print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
         return order(symbol, target_share, "buy", timestamp)
     else:

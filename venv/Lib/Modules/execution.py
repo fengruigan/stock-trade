@@ -44,7 +44,7 @@ def order_value(symbol: str, value: float):
         print("Order value cannot be 0")
         return None
     elif (value > 0):
-        if (float(API.api.get_account().buying_power) > value):
+        if (float(API.api.get_account().buying_power) >= value):
             askprice = API.api.get_last_quote(symbol).askprice
             if (askprice != 0):
                 shares = int(value / askprice)
