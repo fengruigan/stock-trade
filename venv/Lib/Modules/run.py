@@ -12,9 +12,9 @@ class API:
     api = None
 
     def init_api(cls):
-        cls.api = tradeapi.REST(keys._key, keys._secret_key, keys._base_url, api_version='v2')
+        cls.api = tradeapi.REST(Keys._key, Keys._secret_key, Keys._base_url, api_version='v2')
 
-class keys:
+class Keys:
     _key = None
     _secret_key = None
     _base_url = 'https://paper-api.alpaca.markets'
@@ -31,12 +31,12 @@ class keys:
 System classes
 """
 
-class context:
+class Context:
     def __init__(cls):
         pass
 
 
-class data:
+class Data:
     def current(cls, symbols: str, timeframe: str='1Min'):
         return API.api.get_barset(symbols=symbols, timeframe=timeframe, limit=1).df
 
