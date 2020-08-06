@@ -1,1 +1,1 @@
-worker: python venv/tester.py
+worker: python venv/main.py

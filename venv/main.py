@@ -4,13 +4,9 @@ Handles api connection and main functions here
 """
 
 import time
-from Lib.Modules import indicators
-from Lib.Modules import execution as exe
 from Lib.Modules.run import API, Keys, Context, Data
 from Lib.Strategies.strategies import initialize, handle_data
-# from Lib.Strategies.bollinger import initialize, handle_data
-import pandas as pd
-import sys
+# import sys
 
 # use this method to update user API keys
 alpaca_key = 'PK37ODJ81HJIFAHS6O86'
