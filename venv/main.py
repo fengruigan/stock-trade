@@ -33,7 +33,7 @@ while (run_time < 43200):  # time is set to be one month from now
         curr_minute = API.api.get_clock().__getattr__('timestamp').minute
         run_time = run_time + 1
         # print("Strategy ran for " + str(run_time) + " minutes")
-        handle_data(context=context, data=Data)
+        handle_data(context=Context, data=Data)
     else:
         time.sleep(5) # add delay to prevent API request flood
 

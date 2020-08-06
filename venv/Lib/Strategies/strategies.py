@@ -97,12 +97,12 @@ def generate_signals(context, data):
             px = data.history(data, security,
                                       context.params['indicator_lookback'], context.params['indicator_freq'])
         except:
-            print("error here!!!!!!!")
+            print("Error acquiring data")
             return
         # px = price_data[security]
         context.signals[security] = signal_function(px[security], context.params,
             context.signals[security])
-        print(security + " has signal " + str(context.signals[security]))
+        # print(security + " has signal " + str(context.signals[security]))
 
 def signal_function(px, params, last_signal):
     """
