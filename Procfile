@@ -1,1 +1,1 @@
-release: python venv/tester.py
+worker: python venv/tester.py
