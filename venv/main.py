@@ -27,6 +27,7 @@ while (run_time < 43200):  # time is set to be one month from now
         print("Sleeping till market open")
         try:
             time.sleep((API.api.get_clock().next_open - API.api.get_clock().timestamp).seconds + 10)
+            print("Running trading procedure for " + time.ctime())
         except:
             time.sleep(5)
     if (API.api.get_clock().__getattr__('timestamp').minute != curr_minute):
@@ -36,4 +37,3 @@ while (run_time < 43200):  # time is set to be one month from now
         handle_data(context=Context, data=Data)
     else:
         time.sleep(5) # add delay to prevent API request flood
-
