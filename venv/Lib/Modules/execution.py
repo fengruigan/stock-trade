@@ -41,7 +41,7 @@ def order_value(symbol: str, value: float):
         method will close position (sell all) for "AAPL" with order id returned
     """
     if (value == 0):
-        print("Order value cannot be 0")
+        # print("Order value cannot be 0")
         return None
     elif (value > 0):
         if (float(API.api.get_account().buying_power) >= value):
@@ -49,15 +49,15 @@ def order_value(symbol: str, value: float):
             if (askprice != 0):
                 shares = int(value / askprice)
                 if (shares <= 0):
-                    print("Order value too low, attempting to buy $" + str(value) + " of " + symbol + ", but the askprice is $" + str(askprice))
+                    # print("Order value too low, attempting to buy $" + str(value) + " of " + symbol + ", but the askprice is $" + str(askprice))
                     return None
                 print("Placing order to buy " + str(shares) + " shares of " + symbol)
                 return order(symbol, shares, "buy")
             else:
-                print("Error reading askprice of " + symbol + ", askprice = 0")
+                # print("Error reading askprice of " + symbol + ", askprice = 0")
                 return None
         else:
-            print("Error buying " + symbol + ", not enough buying power")
+            # print("Error buying " + symbol + ", not enough buying power")
             return None
     else:
         value = -value
@@ -70,14 +70,14 @@ def order_value(symbol: str, value: float):
                     if (bidprice != 0):
                         shares = int(value / bidprice)
                         if (shares == 0):
-                            print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
+                            # print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
                             return None
                         print("Placing order to sell " + str(shares) + " shares of " + symbol)
                         return order(symbol, shares, "sell")
                     else:
-                        print("Error reading bidprice of " + symbol + ", bidprice = 0 ")
+                        # print("Error reading bidprice of " + symbol + ", bidprice = 0 ")
                         return None
-        print("Attempted to sell " + symbol + " but position not found")
+        # print("Attempted to sell " + symbol + " but position not found")
         return None
 
 
@@ -131,8 +131,7 @@ def order_target(symbol:str, target_share:int):
                     print("Placing order to buy " + str(shares) + " shares of " + symbol)
                     return order(symbol, shares, "buy")
                 else:
-                    print(
-                        "Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
+                    # print("Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
                     return None
             else:
                 print("Placing order to sell " + str(shares) + " shares of " + symbol)
@@ -141,7 +140,7 @@ def order_target(symbol:str, target_share:int):
         print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
         return order(symbol, target_share, "buy")
     else:
-        print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
+        # print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
         return None
 
 
