@@ -61,24 +61,26 @@ def order_value(symbol: str, value: float):
             return None
     else:
         value = -value
-        for position in API.api.list_positions():
-            if (symbol.__eq__(position.symbol)):
-                if (value >= float(position.market_value)):  # position.market_value should be get_last_quote(symbol) instead?
-                    return API.api.close_position(symbol).id
-                else:
-                    bidprice = API.api.get_last_quote(symbol).bidprice
-                    if (bidprice != 0):
-                        shares = int(value / bidprice)
-                        if (shares == 0):
-                            # print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
-                            return None
-                        print("Placing order to sell " + str(shares) + " shares of " + symbol)
-                        return order(symbol, shares, "sell")
-                    else:
-                        # print("Error reading bidprice of " + symbol + ", bidprice = 0 ")
-                        return None
-        # print("Attempted to sell " + symbol + " but position not found")
-        return None
+        try:
+            posiiton = API.api.get_position(symbol=symbol)
+        except:
+            # print("Attempted to sell " + symbol + " but position not found")
+            return None
+        if (value >= float(position.market_value)):  # position.market_value should be get_last_quote(symbol) instead?
+            print("Closing position for " + symbol)
+            return API.api.close_position(symbol).id
+        else:
+            bidprice = API.api.get_last_quote(symbol).bidprice
+            if (bidprice != 0):
+                shares = int(value / bidprice)
+                if (shares == 0):
+                    # print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
+                    return None
+                print("Placing order to sell " + str(shares) + " shares of " + symbol)
+                return order(symbol, shares, "sell")
+            else:
+                # print("Error reading bidprice of " + symbol + ", bidprice = 0 ")
+                return None
 
 
 def order_percent(symbol:str, percent:float):
@@ -121,27 +123,29 @@ def order_target(symbol:str, target_share:int):
         if current position qty of "AAPL" is 5, method will attempt to buy 5 shares of "AAPL"
         returning the order id in both cases
     """
-    for position in API.api.list_positions():
-        if (symbol.__eq__(position.symbol)):
-            shares = target_share - int(position.qty)
-            if shares == 0:
-                return None
-            elif shares > 0:
-                if (API.api.get_last_quote(symbol).askprice * shares < float(API.api.get_account().buying_power)):
-                    print("Placing order to buy " + str(shares) + " shares of " + symbol)
-                    return order(symbol, shares, "buy")
-                else:
-                    # print("Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
-                    return None
-            else:
-                print("Placing order to sell " + str(shares) + " shares of " + symbol)
-                return order(symbol, -shares, "sell")
-    if (API.api.get_last_quote(symbol).askprice * target_share < float(API.api.get_account().buying_power)):
-        print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
-        return order(symbol, target_share, "buy")
-    else:
-        # print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
+    try:
+        position = API.api.get_position(symbol=symbol)
+    except:
+        if (API.api.get_last_quote(symbol).askprice * target_share < float(API.api.get_account().buying_power)):
+            print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
+            return order(symbol, target_share, "buy")
+        else:
+            # print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
+            return None
+    shares = target_share - int(position.qty)
+    if shares == 0:
         return None
+    elif shares > 0:
+        if (API.api.get_last_quote(symbol).askprice * shares < float(API.api.get_account().buying_power)):
+            print("Placing order to buy " + str(shares) + " shares of " + symbol)
+            return order(symbol, shares, "buy")
+        else:
+            # print("Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
+            return None
+    else:
+        print("Placing order to sell " + str(shares) + " shares of " + symbol)
+        return order(symbol, -shares, "sell")
+
 
 
 def order_target_value(symbol: str, target_value: float):
@@ -163,11 +167,13 @@ def order_target_value(symbol: str, target_value: float):
     if (target_value <= 0):
         print("Target_value must be > 0")
         return None
-    for position in API.api.list_positions():
-        if (symbol.__eq__(position.symbol)):
-            value = target_value - float(position.market_value)  # position.market_value should be get_last_quote(symbol) instead?
-            return order_value(symbol, value)
-    return order_value(symbol, target_value)
+    try:
+        position = API.api.get_position(symbol=symbol)
+    except:
+        return order_value(symbol, target_value)
+    value = target_value - float(position.market_value)  # position.market_value should be get_last_quote(symbol) instead?
+    return order_value(symbol, value)
+
 
 
 def order_target_percent(symbol: str, target_percent: float):
@@ -190,12 +196,15 @@ def order_target_percent(symbol: str, target_percent: float):
         print("Shorting is currently not supported")
         target_percent == 0
     if (target_percent == 0):
-        for position in API.api.list_positions():
-            if (symbol.__eq__(position.symbol)):
-                return API.api.close_position(symbol).id
-        return None
-    for position in API.api.list_positions():
-        if (symbol.__eq__(position.symbol)):
-            percent = target_percent - (float(position.market_value) / float(API.api.get_account().portfolio_value)) # position.market_value should be get_last_quote(symbol) instead?
-            return order_percent(symbol, percent)
-    return order_percent(symbol, target_percent)
+        try:
+            position = API.api.get_position(symbol=symbol)
+        except:
+            return None
+        print("Closing position for " + symbol)
+        return API.api.close_position(symbol).id
+    try:
+        position = API.api.get_position(symbol=symbol)
+    except:
+        return order_percent(symbol, target_percent)
+    percent = target_percent - (float(position.market_value) / float(API.api.get_account().portfolio_value)) # position.market_value should be get_last_quote(symbol) instead?
+    return order_percent(symbol, percent)
