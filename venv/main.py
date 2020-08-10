@@ -35,7 +35,6 @@ def trading_procedure():
                 time.sleep(5)
         if (API.api.get_clock().__getattr__('timestamp').minute != curr_minute):
             curr_minute = API.api.get_clock().__getattr__('timestamp').minute
-            run_time = run_time + 1
             # print("Strategy ran for " + str(run_time) + " minutes")
             handle_data(context=Context, data=Data)
         else:
