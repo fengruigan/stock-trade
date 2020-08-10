@@ -51,7 +51,7 @@ def order_value(symbol: str, value: float):
                 if (shares <= 0):
                     # print("Order value too low, attempting to buy $" + str(value) + " of " + symbol + ", but the askprice is $" + str(askprice))
                     return None
-                print("Placing order to buy " + str(shares) + " shares of " + symbol)
+                print("Buying " + str(shares) + " shares of " + symbol)
                 return order(symbol, shares, "buy")
             else:
                 # print("Error reading askprice of " + symbol + ", askprice = 0")
@@ -62,7 +62,7 @@ def order_value(symbol: str, value: float):
     else:
         value = -value
         try:
-            posiiton = API.api.get_position(symbol=symbol)
+            position = API.api.get_position(symbol=symbol)
         except:
             # print("Attempted to sell " + symbol + " but position not found")
             return None
@@ -77,7 +77,7 @@ def order_value(symbol: str, value: float):
                 if (shares == 0):
                     # print("Order value too low, attempting to sell $" + str(value) + " of " + symbol + ", but the bidprice is $" + str(bidprice))
                     return None
-                print("Placing order to sell " + str(shares) + " shares of " + symbol)
+                print("Selling " + str(shares) + " shares of " + symbol)
                 return order(symbol, shares, "sell")
             else:
                 # print("Error reading bidprice of " + symbol + ", bidprice = 0 ")
@@ -128,7 +128,7 @@ def order_target(symbol:str, target_share:int):
         position = API.api.get_position(symbol=symbol)
     except:
         if (API.api.get_last_quote(symbol).askprice * target_share < float(API.api.get_account().buying_power)):
-            print("Placing order to buy " + str(target_shares) + " shares of " + symbol)
+            print("Buying " + str(target_shares) + " shares of " + symbol)
             return order(symbol, target_share, "buy")
         else:
             # print("Error buying " + str(target_share) + " shares of " + symbol + ", not enough buying power")
@@ -138,13 +138,13 @@ def order_target(symbol:str, target_share:int):
         return None
     elif shares > 0:
         if (API.api.get_last_quote(symbol).askprice * shares < float(API.api.get_account().buying_power)):
-            print("Placing order to buy " + str(shares) + " shares of " + symbol)
+            print("Buying " + str(shares) + " shares of " + symbol)
             return order(symbol, shares, "buy")
         else:
             # print("Error buying " + str(shares) + " shares of " + symbol + ", not enough buying power")
             return None
     else:
-        print("Placing order to sell " + str(shares) + " shares of " + symbol)
+        print("Selling " + str(shares) + " shares of " + symbol)
         return order(symbol, -shares, "sell")
 
 
