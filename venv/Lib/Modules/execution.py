@@ -67,7 +67,8 @@ def order_value(symbol: str, value: float):
             # print("Attempted to sell " + symbol + " but position not found")
             return None
         if (value >= float(position.market_value)):  # position.market_value should be get_last_quote(symbol) instead?
-            print("Closing position for " + symbol)
+            qty = position.qty
+            print("Selling " + str(qty) + " shares of " + symbol + ", position closed")
             return API.api.close_position(symbol).id
         else:
             bidprice = API.api.get_last_quote(symbol).bidprice
@@ -200,7 +201,8 @@ def order_target_percent(symbol: str, target_percent: float):
             position = API.api.get_position(symbol=symbol)
         except:
             return None
-        print("Closing position for " + symbol)
+        qty = position.qty
+        print("Selling " + str(qty) + " shares of " + symbol + ", position closed")
         return API.api.close_position(symbol).id
     try:
         position = API.api.get_position(symbol=symbol)
